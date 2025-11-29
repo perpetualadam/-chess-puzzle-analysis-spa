@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Puzzle Verification Test</title>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+</head>
+<body>
+  <h1>Mate Puzzle Verification</h1>
+  <div id="results"></div>
+  
+  <script>
+    const puzzles = [
+      { id: 'mate1-1', fen: '6k1/5ppp/8/8/8/8/5PPP/Q5K1 w - - 0 1', side: 'w', best: ['Qa8#'] },
+      { id: 'mate-epaulette-1', fen: '5rkr/8/3Q4/8/8/8/1K6/8 w - - 0 1', side: 'w', best: ['Qg6#'] },
+      { id: 'mate-epaulette-2', fen: '3rkr2/8/8/8/8/8/4Q3/1K6 w - - 0 1', side: 'w', best: ['Qe8#'] },
+      { id: 'mate-smothered-1', fen: '6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1', side: 'w', best: ['Nf7#'] },
+      { id: 'mate-smothered-2', fen: 'kr6/pp6/8/8/8/8/2N5/K7 w - - 0 1', side: 'w', best: ['Nb7#'] },
+      { id: 'mate-smothered-3', fen: '8/8/8/8/8/6n1/5PP1/6RK b - - 0 1', side: 'b', best: ['Nf2#'] },
+      { id: 'mate-arabian-1', fen: '7k/6pp/7N/8/8/8/8/5RK1 w - - 0 1', side: 'w', best: ['Rh1#'] },
+      { id: 'mate-arabian-2', fen: '6k1/6pp/7N/8/8/8/8/5RK1 w - - 0 1', side: 'w', best: ['Rg1#'] },
+      { id: 'mate-anastasia-1', fen: '6k1/5Npp/8/8/8/8/8/4R2K w - - 0 1', side: 'w', best: ['Re8#'] },
+      { id: 'mate-anastasia-2', fen: '1r4k1/6pp/7N/8/8/8/8/4R2K w - - 0 1', side: 'w', best: ['Re8#'] },
+      { id: 'mate-boden-1', fen: '2kr4/p1pp4/8/8/8/8/1B6/2B3K1 w - - 0 1', side: 'w', best: ['Ba6#'] },
+      { id: 'mate-boden-2', fen: '2kr4/p1pp4/8/8/8/8/2B5/1B4K1 w - - 0 1', side: 'w', best: ['Ba6#'] },
+      { id: 'mate-boden-3', fen: '2kr4/p1pp4/8/8/8/8/3B4/B5K1 w - - 0 1', side: 'w', best: ['Ba6#'] },
+      { id: 'mate-boden-4', fen: '2kr4/p1pp4/8/8/8/8/4B3/B6K w - - 0 1', side: 'w', best: ['Ba6#'] },
+      { id: 'mate-backrank-1', fen: '6k1/5ppp/8/8/8/8/4QPPP/4R1K1 w - - 0 1', side: 'w', best: ['Qe8#'] },
+      { id: 'mate-backrank-2', fen: '4r1k1/5ppp/8/8/8/8/4qPPP/4R1K1 b - - 0 1', side: 'b', best: ['Qxe1#'] },
+      { id: 'mate-dovetail-1', fen: '4k3/3p1p2/8/4Q3/8/8/8/4R1K1 w - - 0 1', side: 'w', best: ['Qe7#'] },
+      { id: 'mate-dovetail-2', fen: '4r1k1/8/8/8/4q3/8/3P1P2/4K3 b - - 0 1', side: 'b', best: ['Qe2#'] }
+    ];
+    
+    let html = '<table border="1"><tr><th>ID</th><th>Status</th><th>Error</th></tr>';
+    
+    puzzles.forEach(p => {
+      const chess = new Chess();
+      try {
+        chess.load(p.fen);
+        
+        // Check turn
+        if ((p.side === 'w' && chess.turn() !== 'w') || (p.side === 'b' && chess.turn() !== 'b')) {
+          html += `<tr><td>${p.id}</td><td style="color:red">FAIL</td><td>Turn mismatch</td></tr>`;
+          return;
+        }
+        
+        // Try moves
+        let ok = true;
+        let err = '';
+        for (const san of p.best) {
+          const mv = chess.move(san, { sloppy: true });
+          if (!mv) {
+            ok = false;
+            err = 'Illegal move: ' + san;
+            break;
+          }
+        }
+        
+        if (ok && !chess.in_checkmate()) {
+          ok = false;
+          err = 'Not checkmate after moves';
+        }
+        
+        if (ok) {
+          html += `<tr><td>${p.id}</td><td style="color:green">PASS</td><td>-</td></tr>`;
+        } else {
+          html += `<tr><td>${p.id}</td><td style="color:red">FAIL</td><td>${err}</td></tr>`;
+        }
+      } catch (e) {
+        html += `<tr><td>${p.id}</td><td style="color:red">FAIL</td><td>Bad FEN: ${e.message}</td></tr>`;
+      }
+    });
+    
+    html += '</table>';
+    document.getElementById('results').innerHTML = html;
+  </script>
+</body>
+</html>
+

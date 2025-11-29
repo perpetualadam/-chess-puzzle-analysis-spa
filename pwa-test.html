@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PWA Test - Chess App</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #1a1f2e;
+      color: #e0e6ed;
+    }
+    h1 { color: #3fb959; }
+    .test-item {
+      background: #252d3f;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border-left: 4px solid #3fb959;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .pass { background: #3fb959; color: white; }
+    .fail { background: #e74c3c; color: white; }
+    .pending { background: #f39c12; color: white; }
+    button {
+      background: #3fb959;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #35a04d; }
+    pre {
+      background: #1a1f2e;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>♟️ Chess PWA Test Suite</h1>
+  <p>This page tests if your Chess app is properly configured as a PWA.</p>
+
+  <div id="tests"></div>
+
+  <h2>Actions</h2>
+  <button onclick="testInstall()">Test Install Prompt</button>
+  <button onclick="testOffline()">Test Offline Mode</button>
+  <button onclick="window.location.href='/'">Go to App</button>
+
+  <h2>Service Worker Status</h2>
+  <pre id="sw-status">Checking...</pre>
+
+  <h2>Cache Status</h2>
+  <pre id="cache-status">Checking...</pre>
+
+  <script>
+    const tests = [
+      {
+        name: 'Service Worker Support',
+        test: () => 'serviceWorker' in navigator
+      },
+      {
+        name: 'Service Worker Registered',
+        test: async () => {
+          const registration = await navigator.serviceWorker.getRegistration();
+          return !!registration;
+        }
+      },
+      {
+        name: 'Manifest File',
+        test: async () => {
+          const response = await fetch('/manifest.json');
+          return response.ok;
+        }
+      },
+      {
+        name: 'Icons Exist',
+        test: async () => {
+          const response = await fetch('/icons/icon-192x192.png');
+          return response.ok;
+        }
+      },
+      {
+        name: 'HTTPS or Localhost',
+        test: () => location.protocol === 'https:' || location.hostname === 'localhost'
+      }
+    ];
+
+    async function runTests() {
+      const container = document.getElementById('tests');
+      container.innerHTML = '';
+
+      for (const test of tests) {
+        const div = document.createElement('div');
+        div.className = 'test-item';
+        
+        try {
+          const result = await test.test();
+          const status = result ? 'PASS' : 'FAIL';
+          const statusClass = result ? 'pass' : 'fail';
+          div.innerHTML = `
+            <strong>${test.name}</strong>
+            <span class="status ${statusClass}">${status}</span>
+          `;
+        } catch (error) {
+          div.innerHTML = `
+            <strong>${test.name}</strong>
+            <span class="status fail">ERROR</span>
+            <br><small>${error.message}</small>
+          `;
+        }
+        
+        container.appendChild(div);
+      }
+    }
+
+    async function updateSWStatus() {
+      const el = document.getElementById('sw-status');
+      
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+          el.textContent = `✅ Service Worker Active
+Scope: ${registration.scope}
+State: ${registration.active?.state || 'N/A'}`;
+        } else {
+          el.textContent = '❌ Service Worker not registered';
+        }
+      } else {
+        el.textContent = '❌ Service Worker not supported';
+      }
+    }
+
+    async function updateCacheStatus() {
+      const el = document.getElementById('cache-status');
+      
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        if (cacheNames.length > 0) {
+          const cache = await caches.open(cacheNames[0]);
+          const keys = await cache.keys();
+          el.textContent = `✅ Cache Active
+Cache Name: ${cacheNames[0]}
+Cached Resources: ${keys.length}`;
+        } else {
+          el.textContent = '⚠️ No caches found (load the app first)';
+        }
+      } else {
+        el.textContent = '❌ Cache API not supported';
+      }
+    }
+
+    function testInstall() {
+      alert('Install prompt is triggered automatically by the browser when PWA criteria are met.\n\nLook for the install icon (⊕) in the address bar on desktop, or "Add to Home Screen" in the menu on mobile.');
+    }
+
+    function testOffline() {
+      alert('To test offline mode:\n\n1. Load the main app (/) once while online\n2. Open DevTools → Network tab\n3. Check "Offline" checkbox\n4. Reload the page\n\nThe app should still work!');
+    }
+
+    // Run tests on load
+    runTests();
+    updateSWStatus();
+    updateCacheStatus();
+
+    // Update every 2 seconds
+    setInterval(() => {
+      updateSWStatus();
+      updateCacheStatus();
+    }, 2000);
+  </script>
+</body>
+</html>
+

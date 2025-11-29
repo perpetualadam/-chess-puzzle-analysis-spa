@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test All Mate Puzzles</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <style>
+    body { font-family: monospace; padding: 20px; }
+    .pass { color: green; }
+    .fail { color: red; }
+    .puzzle { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>Mate Puzzle Verification Test</h1>
+  <div id="results"></div>
+
+  <script>
+    const puzzles = [
+      { id: 'mate1-1', fen: '6k1/5ppp/8/8/8/8/5PPP/Q5K1 w - - 0 1', side: 'w', best: ['Qa8#'] },
+      { id: 'mate-epaulette-1', fen: '5rkr/8/3Q4/8/8/8/1K6/8 w - - 0 1', side: 'w', best: ['Qg6#'] },
+      { id: 'mate-smothered-1', fen: '6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1', side: 'w', best: ['Nf7#'] },
+      { id: 'mate-arabian-1', fen: '7k/6pp/5N2/8/8/8/8/R6K w - - 0 1', side: 'w', best: ['Ra8#'] },
+      { id: 'mate-arabian-2', fen: '6k1/5ppp/5N2/8/8/8/8/R6K w - - 0 1', side: 'w', best: ['Ra8#'] },
+      { id: 'mate-anastasia-2', fen: '1r4k1/6pp/7N/8/8/8/8/4R2K w - - 0 1', side: 'w', best: ['Re8#'] },
+      { id: 'mate-backrank-1', fen: '6k1/5ppp/8/8/8/8/4QPPP/4R1K1 w - - 0 1', side: 'w', best: ['Qe8#'] },
+      { id: 'mate-backrank-2', fen: '4r1k1/5ppp/8/8/8/8/4qPPP/4R1K1 b - - 0 1', side: 'b', best: ['Qxe1#'] },
+      { id: 'mate-dovetail-1', fen: '4k3/3p1p2/8/4Q3/8/8/8/4R1K1 w - - 0 1', side: 'w', best: ['Qe7#'] },
+      { id: 'mate-dovetail-2', fen: '4r1k1/8/8/8/4q3/8/3P1P2/4K3 b - - 0 1', side: 'b', best: ['Qe2#'] }
+    ];
+
+    function testPuzzle(puzzle) {
+      const chess = new Chess();
+      try {
+        chess.load(puzzle.fen);
+        
+        // Check turn
+        if ((puzzle.side === 'w' && chess.turn() !== 'w') || (puzzle.side === 'b' && chess.turn() !== 'b')) {
+          return { ok: false, error: 'Turn mismatch' };
+        }
+        
+        // Play moves
+        for (const san of puzzle.best) {
+          const move = chess.move(san, { sloppy: true });
+          if (!move) {
+            return { ok: false, error: `Illegal move: ${san}` };
+          }
+        }
+        
+        // Check checkmate
+        if (!chess.in_checkmate()) {
+          return { ok: false, error: 'Not checkmate after moves' };
+        }
+        
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: e.message };
+      }
+    }
+
+    const results = document.getElementById('results');
+    let passed = 0;
+    let failed = 0;
+
+    puzzles.forEach(puzzle => {
+      const result = testPuzzle(puzzle);
+      const div = document.createElement('div');
+      div.className = 'puzzle ' + (result.ok ? 'pass' : 'fail');
+      
+      if (result.ok) {
+        div.textContent = `✓ ${puzzle.id}: PASS`;
+        passed++;
+      } else {
+        div.textContent = `✗ ${puzzle.id}: FAIL - ${result.error}`;
+        failed++;
+      }
+      
+      results.appendChild(div);
+    });
+
+    const summary = document.createElement('h2');
+    summary.textContent = `Results: ${passed} passed, ${failed} failed out of ${puzzles.length} total`;
+    summary.className = failed === 0 ? 'pass' : 'fail';
+    results.insertBefore(summary, results.firstChild);
+  </script>
+</body>
+</html>
+

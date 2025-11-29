@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset PWA - Chess App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1f2e;
+      color: #e0e6ed;
+    }
+    h1 { color: #3fb959; }
+    button {
+      background: #3fb959;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    button:hover { background: #35a04d; }
+    .status {
+      background: #252d3f;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #3fb959;
+    }
+    pre {
+      background: #1a1f2e;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 Reset PWA</h1>
+  <p>Use this page to clear service workers and caches, then reinstall the PWA.</p>
+
+  <button onclick="unregisterServiceWorkers()">1. Unregister Service Workers</button>
+  <button onclick="clearCaches()">2. Clear All Caches</button>
+  <button onclick="clearAll()">3. Clear Everything</button>
+  <button onclick="window.location.href='/'">4. Go to App</button>
+
+  <div class="status" id="status">
+    <strong>Status:</strong> Ready
+  </div>
+
+  <h2>Current State</h2>
+  <pre id="info">Loading...</pre>
+
+  <script>
+    async function updateInfo() {
+      const info = [];
+      
+      // Service Workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        info.push(`Service Workers: ${registrations.length}`);
+        registrations.forEach((reg, i) => {
+          info.push(`  ${i + 1}. Scope: ${reg.scope}`);
+          info.push(`     State: ${reg.active?.state || 'N/A'}`);
+        });
+      } else {
+        info.push('Service Workers: Not supported');
+      }
+      
+      info.push('');
+      
+      // Caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        info.push(`Caches: ${cacheNames.length}`);
+        cacheNames.forEach((name, i) => {
+          info.push(`  ${i + 1}. ${name}`);
+        });
+      } else {
+        info.push('Caches: Not supported');
+      }
+      
+      document.getElementById('info').textContent = info.join('\n');
+    }
+
+    async function unregisterServiceWorkers() {
+      const status = document.getElementById('status');
+      status.innerHTML = '<strong>Status:</strong> Unregistering service workers...';
+      
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        
+        for (const registration of registrations) {
+          await registration.unregister();
+        }
+        
+        status.innerHTML = `<strong>Status:</strong> ✅ Unregistered ${registrations.length} service worker(s)`;
+      } else {
+        status.innerHTML = '<strong>Status:</strong> ❌ Service workers not supported';
+      }
+      
+      await updateInfo();
+    }
+
+    async function clearCaches() {
+      const status = document.getElementById('status');
+      status.innerHTML = '<strong>Status:</strong> Clearing caches...';
+      
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        
+        for (const name of cacheNames) {
+          await caches.delete(name);
+        }
+        
+        status.innerHTML = `<strong>Status:</strong> ✅ Cleared ${cacheNames.length} cache(s)`;
+      } else {
+        status.innerHTML = '<strong>Status:</strong> ❌ Cache API not supported';
+      }
+      
+      await updateInfo();
+    }
+
+    async function clearAll() {
+      const status = document.getElementById('status');
+      status.innerHTML = '<strong>Status:</strong> Clearing everything...';
+      
+      await unregisterServiceWorkers();
+      await clearCaches();
+      
+      status.innerHTML = '<strong>Status:</strong> ✅ Everything cleared! Reload the app to reinstall.';
+      
+      setTimeout(() => {
+        if (confirm('Clear complete! Reload the main app now?')) {
+          window.location.href = '/';
+        }
+      }, 1000);
+    }
+
+    // Update info on load
+    updateInfo();
+    
+    // Auto-refresh info every 2 seconds
+    setInterval(updateInfo, 2000);
+  </script>
+</body>
+</html>
+

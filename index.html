@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chess Puzzle & Analysis SPA</title>
+
+  <!-- PWA Meta Tags -->
+  <meta name="description" content="Professional chess puzzle trainer and game analysis tool with Stockfish engine" />
+  <meta name="theme-color" content="#3fb959" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Chess Trainer" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+
+  <!-- Chessboard.js CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Chess Puzzle & Analysis</h1>
+    <div class="header-actions">
+      <button id="btn-settings" title="Settings">⚙️</button>
+      <button id="btn-menu" class="mobile-only" title="Menu">☰</button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <nav>
+        <button class="nav-btn active" data-target="puzzle-section">Puzzle Mode</button>
+        <button class="nav-btn" data-target="analysis-section">Analysis Mode</button>
+        <button class="nav-btn" data-target="hof-section">Hall of Fame</button>
+      </nav>
+
+      <section class="panel settings" id="settings-panel" hidden>
+        <h3>Settings</h3>
+        <label>
+          Board Theme
+          <select id="setting-board-theme">
+            <option value="brown">Brown</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="gray">Gray</option>
+          </select>
+        </label>
+        <label>
+          Piece Set
+          <select id="setting-piece-set">
+            <option value="wikipedia">Wikipedia</option>
+            <option value="merida">Merida</option>
+          </select>
+        </label>
+        <label>
+          Engine Depth
+          <input id="setting-depth" type="number" min="4" max="30" step="1" value="12" />
+        </label>
+        <label>
+          MultiPV (lines)
+          <input id="setting-multipv" type="number" min="1" max="3" step="1" value="3" />
+        </label>
+        <hr/>
+        <label>
+          <input id="setting-timer-enabled" type="checkbox" /> Enable Timed Puzzles
+        </label>
+        <label>
+          Timer Seconds
+          <input id="setting-timer-seconds" type="number" min="10" max="300" step="5" value="60" />
+        </label>
+        <label>
+          <input id="setting-scoring-enabled" type="checkbox" checked /> Enable Scoring/Rating Changes
+        </label>
+        <button id="save-settings">Save</button>
+        <hr/>
+        <div class="dev-section">
+          <h4 style="margin: 8px 0; font-size: 14px; color: var(--muted);">Developer Tools</h4>
+          <button id="btn-verify-puzzles" title="Verify all composed mate-pattern puzzles">Verify Puzzles</button>
+        </div>
+      </section>
+    </aside>
+
+    <main class="content">
+      <!-- Shared board area -->
+      <section class="board-area">
+        <div id="board-wrapper">
+          <div id="board"></div>
+          <canvas id="arrows-canvas"></canvas>
+        </div>
+        <div class="right-rail">
+          <div class="eval-bar" title="Engine evaluation">
+            <div class="eval-pointer" id="eval-pointer"></div>
+          </div>
+
+          <div class="mobile-tabs">
+            <button class="tab-btn active" data-tab="lines">Lines</button>
+            <button class="tab-btn" data-tab="chart">Chart</button>
+          </div>
+          <div class="eval-controls panel-tab" id="lines-panel" data-panel="lines">
+            <button id="engine-start">Start Engine</button>
+            <button id="engine-stop">Stop</button>
+            <label>Depth <input id="engine-depth" type="range" min="5" max="28" value="14"/></label>
+            <label>MultiPV <input id="engine-multipv" type="range" min="1" max="3" value="3"/></label>
+            <div id="engine-lines"></div>
+          </div>
+
+          <div class="chart-wrap panel-tab" id="chart-panel" data-panel="chart">
+            <canvas id="eval-chart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Modes -->
+      <section id="puzzle-section" class="mode-section">
+        <div class="mode-header">
+          <h2>Puzzle Mode</h2>
+          <div class="puzzle-stats">
+            <span>Rating: <b id="user-rating">1200</b></span>
+            <span>Streak: <b id="user-streak">0</b></span>
+            <span>Level: <b id="user-level">1</b></span>
+          </div>
+        </div>
+
+        <div class="puzzle-controls">
+          <select id="puzzle-mode">
+            <option value="rated">Rated Puzzles</option>
+            <option value="custom">Custom Practice</option>
+            <option value="rush">Puzzle Rush</option>
+            <option value="battle">Puzzle Battle (AI)</option>
+            <option value="daily">Daily Puzzle</option>
+          </select>
+
+          <div id="custom-filters" hidden>
+            <label> Theme
+              <select id="filter-theme">
+                <option value="any">Any</option>
+                <option value="mate">Mate</option>
+                <option value="fork">Fork</option>
+                <option value="pin">Pin</option>
+                <option value="discovered">Discovered</option>
+                <optgroup label="Mate patterns">
+                  <option value="arabian">arabian</option>
+                  <option value="anastasia">anastasia</option>
+                  <option value="boden">boden</option>
+                  <option value="backrank">backrank</option>
+                  <option value="dovetail">dovetail</option>
+                  <option value="smothered">smothered</option>
+                  <option value="epaulette">epaulette</option>
+                </optgroup>
+              </select>
+            </label>
+            <label> Min Rating <input id="filter-min" type="number" value="600"></label>
+            <label> Max Rating <input id="filter-max" type="number" value="2400"></label>
+            <label><input id="filter-include-imported" type="checkbox" checked> Include Imported</label>
+          </div>
+
+          <div class="inline-toggles">
+            <label title="Enable Timed Puzzles"><input id="toggle-timer" type="checkbox"/> Timed</label>
+            <span id="puzzle-timer" class="timer-badge" hidden>⏱ 60</span>
+            <label title="Enable Scoring/Rating"><input id="toggle-scoring" type="checkbox" checked/> Scoring</label>
+          </div>
+
+          <div id="rush-stats" class="rush-stats" hidden>
+            <span class="rush-time">⏱ <b id="rush-time-remaining">3:00</b></span>
+            <span class="rush-strikes">Strikes: <span id="rush-strikes-display">⭕⭕⭕</span></span>
+            <span class="rush-score">Score: <b id="rush-score">0</b></span>
+            <span class="rush-solved">Solved: <b id="rush-solved">0</b></span>
+          </div>
+
+          <div id="battle-stats" class="battle-stats" hidden>
+            <span class="battle-player">You: <b id="battle-player-score">0</b></span>
+            <span class="battle-ai">AI: <b id="battle-ai-score">0</b></span>
+            <span class="battle-target">First to <b id="battle-target-score">5</b></span>
+          </div>
+
+          <button id="btn-new-puzzle">New Puzzle</button>
+          <button id="btn-hint">Hint</button>
+          <button id="btn-solution">Solution</button>
+          <button id="btn-view-source" hidden title="Jump to this position in the original game">View Source Game</button>
+          <button id="btn-start-rush" hidden>Start Rush</button>
+          <button id="btn-end-rush" hidden>End Rush</button>
+          <button id="btn-start-battle" hidden>Start Battle</button>
+          <button id="btn-end-battle" hidden>End Battle</button>
+        </div>
+
+        <div class="puzzle-info">
+          <div id="puzzle-source"></div>
+          <div id="puzzle-pattern-tip" class="pattern-tip" hidden title="Pattern learning tip"></div>
+          <div id="puzzle-instructions">Find the best move.</div>
+        </div>
+      </section>
+
+      <section id="analysis-section" class="mode-section" hidden>
+        <div class="mode-header">
+          <h2>Analysis Mode</h2>
+          <div>
+            <button id="btn-load-pgn">Load PGN</button>
+            <button id="btn-analyze-game">Analyze Game</button>
+            <button id="btn-export-pgn">Export Annotated PGN</button>
+          </div>
+        </div>
+        <div class="analysis-controls">
+          <textarea id="pgn-input" placeholder="Paste PGN here or pick from Hall of Fame..."></textarea>
+          <div class="importers">
+            <input id="import-file" type="file" accept=".csv,.pgn" />
+            <button id="btn-import-puzzles">Import Puzzles</button>
+            <button id="btn-use-imported">Use Imported Puzzles</button>
+            <span id="import-status"></span>
+          </div>
+
+          <!-- Captured Pieces Display -->
+          <div id="captured-pieces-container">
+            <div class="captured-section">
+              <div class="captured-header">
+                <span class="captured-label">White Captured</span>
+                <span id="white-material" class="material-count"></span>
+              </div>
+              <div id="white-captured" class="captured-pieces"></div>
+            </div>
+
+            <div id="material-advantage"></div>
+
+            <div class="captured-section">
+              <div class="captured-header">
+                <span class="captured-label">Black Captured</span>
+                <span id="black-material" class="material-count"></span>
+              </div>
+              <div id="black-captured" class="captured-pieces"></div>
+            </div>
+          </div>
+
+          <div class="game-nav">
+            <button id="first-move">|&lt;</button>
+            <button id="prev-move">&lt;</button>
+            <span id="move-indicator">0/0</span>
+            <button id="next-move">&gt;</button>
+            <button id="last-move">&gt;|</button>
+          </div>
+          <div id="game-mistakes"></div>
+        </div>
+      </section>
+
+      <section id="hof-section" class="mode-section" hidden>
+        <div class="mode-header">
+          <h2>Hall of Fame</h2>
+        </div>
+        <div id="hof-list" class="hof-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Vendor libs -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- App scripts -->
+  <script src="js/storage.js?v=8"></script>
+  <script src="data/games.js?v=8"></script>
+  <script src="data/puzzles.js?v=8"></script>
+  <script src="js/engine.js?v=8"></script>
+  <script src="js/puzzle.js?v=9"></script>
+  <script src="js/analysis.js?v=24"></script>
+  <script src="js/importer.js?v=8"></script>
+  <script src="js/hallOfFame.js?v=8"></script>
+  <script src="js/app.js?v=8"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('[PWA] Service Worker registered successfully:', registration.scope);
+
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New service worker available, show update notification
+                  if (confirm('New version available! Reload to update?')) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          })
+          .catch(error => {
+            console.log('[PWA] Service Worker registration failed:', error);
+          });
+      });
+
+      // Handle service worker updates
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+    }
+
+    // Install prompt for PWA
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      // Show install button/banner (optional - you can add UI for this)
+      console.log('[PWA] Install prompt available');
+
+      // You can trigger the install prompt with:
+      // deferredPrompt.prompt();
+      // deferredPrompt.userChoice.then((choiceResult) => { ... });
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('[PWA] App installed successfully!');
+      deferredPrompt = null;
+    });
+  </script>
+</body>
+</html>
+

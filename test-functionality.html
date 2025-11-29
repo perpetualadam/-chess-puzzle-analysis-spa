@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess App Functionality Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #1a1f2e;
+      color: #e0e6ed;
+    }
+    h1 { color: #3fb959; margin-bottom: 10px; }
+    h2 { color: #3fb959; font-size: 18px; margin-top: 30px; border-bottom: 2px solid #3fb959; padding-bottom: 5px; }
+    .test-section {
+      background: #252d3f;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 4px solid #3fb959;
+    }
+    .test-item {
+      padding: 10px;
+      margin: 8px 0;
+      background: #1a1f2e;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .test-item.pass { border-left: 4px solid #3fb959; }
+    .test-item.fail { border-left: 4px solid #e74c3c; }
+    .test-item.pending { border-left: 4px solid #f39c12; }
+    .status {
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .status.pass { background: #3fb959; color: white; }
+    .status.fail { background: #e74c3c; color: white; }
+    .status.pending { background: #f39c12; color: white; }
+    button {
+      background: #3fb959;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #35a04d; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    .summary {
+      background: #252d3f;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+      font-size: 18px;
+    }
+    .summary.all-pass { border: 3px solid #3fb959; }
+    .summary.has-fail { border: 3px solid #e74c3c; }
+    pre {
+      background: #1a1f2e;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .note {
+      background: #2c3e50;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 13px;
+      border-left: 3px solid #3498db;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Chess App Functionality Test Suite</h1>
+  <p>This page tests all buttons, chess engine accuracy, and core functionality.</p>
+
+  <button onclick="runAllTests()">▶️ Run All Tests</button>
+  <button onclick="location.href='/'">🏠 Go to App</button>
+
+  <div class="summary" id="summary">
+    <strong>Status:</strong> Ready to test
+  </div>
+
+  <div class="test-section">
+    <h2>1. Core Dependencies</h2>
+    <div id="test-dependencies"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>2. UI Elements & Buttons</h2>
+    <div id="test-ui"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>3. Chess Engine (Stockfish)</h2>
+    <div id="test-engine"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>4. Chess Logic Accuracy</h2>
+    <div id="test-chess-logic"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>5. PWA Features</h2>
+    <div id="test-pwa"></div>
+  </div>
+
+  <div class="note">
+    <strong>📝 Note:</strong> This test suite verifies that all components are properly loaded and functional.
+    For interactive testing, please use the main app and manually test each mode.
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+
+  <script>
+    const results = {
+      pass: 0,
+      fail: 0,
+      total: 0
+    };
+
+    function addTest(containerId, name, status, details = '') {
+      results.total++;
+      if (status === 'pass') results.pass++;
+      if (status === 'fail') results.fail++;
+
+      const container = document.getElementById(containerId);
+      const div = document.createElement('div');
+      div.className = `test-item ${status}`;
+      div.innerHTML = `
+        <span>${name} ${details ? `<br><small style="color: #95a5a6;">${details}</small>` : ''}</span>
+        <span class="status ${status}">${status.toUpperCase()}</span>
+      `;
+      container.appendChild(div);
+    }
+
+    async function runAllTests() {
+      // Clear previous results
+      results.pass = 0;
+      results.fail = 0;
+      results.total = 0;
+      document.querySelectorAll('.test-item').forEach(el => el.remove());
+
+      await testDependencies();
+      await testUI();
+      await testEngine();
+      await testChessLogic();
+      await testPWA();
+
+      updateSummary();
+    }
+
+    async function testDependencies() {
+      addTest('test-dependencies', 'jQuery loaded', typeof jQuery !== 'undefined' ? 'pass' : 'fail', jQuery ? `v${jQuery.fn.jquery}` : '');
+      addTest('test-dependencies', 'Chess.js loaded', typeof Chess !== 'undefined' ? 'pass' : 'fail');
+      addTest('test-dependencies', 'Chessboard.js loaded', typeof Chessboard !== 'undefined' ? 'pass' : 'fail');
+
+      // Test if app scripts are accessible
+      const appScripts = ['storage.js', 'engine.js', 'puzzle.js', 'analysis.js', 'importer.js', 'hallOfFame.js', 'app.js'];
+      for (const script of appScripts) {
+        try {
+          const response = await fetch(`/js/${script}`, { method: 'HEAD' });
+          addTest('test-dependencies', `js/${script}`, response.ok ? 'pass' : 'fail');
+        } catch (e) {
+          addTest('test-dependencies', `js/${script}`, 'fail', e.message);
+        }
+      }
+    }
+
+    async function testUI() {
+      // Open the main app in iframe to test UI elements
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = '/';
+      document.body.appendChild(iframe);
+
+      await new Promise(resolve => {
+        iframe.onload = () => {
+          setTimeout(() => {
+            const doc = iframe.contentDocument;
+
+            // Test navigation buttons
+            addTest('test-ui', 'Puzzle Mode button', doc.querySelector('[data-target="puzzle-section"]') ? 'pass' : 'fail');
+            addTest('test-ui', 'Analysis Mode button', doc.querySelector('[data-target="analysis-section"]') ? 'pass' : 'fail');
+            addTest('test-ui', 'Hall of Fame button', doc.querySelector('[data-target="hof-section"]') ? 'pass' : 'fail');
+
+            // Test puzzle controls
+            addTest('test-ui', 'New Puzzle button', doc.getElementById('btn-new-puzzle') ? 'pass' : 'fail');
+            addTest('test-ui', 'Hint button', doc.getElementById('btn-hint') ? 'pass' : 'fail');
+            addTest('test-ui', 'Solution button', doc.getElementById('btn-solution') ? 'pass' : 'fail');
+
+            // Test analysis controls
+            addTest('test-ui', 'Load PGN button', doc.getElementById('btn-load-pgn') ? 'pass' : 'fail');
+            addTest('test-ui', 'Analyze Game button', doc.getElementById('btn-analyze-game') ? 'pass' : 'fail');
+            addTest('test-ui', 'Export PGN button', doc.getElementById('btn-export-pgn') ? 'pass' : 'fail');
+
+            // Test navigation controls
+            addTest('test-ui', 'First Move button', doc.getElementById('first-move') ? 'pass' : 'fail');
+            addTest('test-ui', 'Previous Move button', doc.getElementById('prev-move') ? 'pass' : 'fail');
+            addTest('test-ui', 'Next Move button', doc.getElementById('next-move') ? 'pass' : 'fail');
+            addTest('test-ui', 'Last Move button', doc.getElementById('last-move') ? 'pass' : 'fail');
+
+            // Test engine controls
+            addTest('test-ui', 'Start Engine button', doc.getElementById('engine-start') ? 'pass' : 'fail');
+            addTest('test-ui', 'Stop Engine button', doc.getElementById('engine-stop') ? 'pass' : 'fail');
+
+            // Test settings
+            addTest('test-ui', 'Settings button', doc.getElementById('btn-settings') ? 'pass' : 'fail');
+            addTest('test-ui', 'Settings panel', doc.getElementById('settings-panel') ? 'pass' : 'fail');
+
+            // Test board
+            addTest('test-ui', 'Chess board element', doc.getElementById('board') ? 'pass' : 'fail');
+
+            document.body.removeChild(iframe);
+            resolve();
+          }, 2000);
+        };
+      });
+    }
+
+    async function testEngine() {
+      addTest('test-engine', 'Stockfish worker file exists', 'pending', 'Testing...');
+
+      try {
+        const response = await fetch('/workers/stockfish.worker.js', { method: 'HEAD' });
+        const lastTest = document.querySelector('#test-engine .test-item:last-child');
+        if (response.ok) {
+          lastTest.className = 'test-item pass';
+          lastTest.querySelector('.status').className = 'status pass';
+          lastTest.querySelector('.status').textContent = 'PASS';
+          results.pass++;
+        } else {
+          lastTest.className = 'test-item fail';
+          lastTest.querySelector('.status').className = 'status fail';
+          lastTest.querySelector('.status').textContent = 'FAIL';
+          results.fail++;
+        }
+      } catch (e) {
+        const lastTest = document.querySelector('#test-engine .test-item:last-child');
+        lastTest.className = 'test-item fail';
+        lastTest.querySelector('.status').className = 'status fail';
+        lastTest.querySelector('.status').textContent = 'FAIL';
+        results.fail++;
+      }
+
+      // Test engine initialization
+      addTest('test-engine', 'Engine can initialize', 'pending', 'Testing Stockfish...');
+
+      try {
+        const worker = new Worker('/workers/stockfish.worker.js');
+        let engineReady = false;
+        let testCompleted = false;
+
+        worker.onmessage = (e) => {
+          console.log('[Engine Test] Received:', e.data);
+          if (e.data === 'readyok' && !testCompleted) {
+            engineReady = true;
+            testCompleted = true;
+            worker.terminate();
+
+            const lastTest = document.querySelector('#test-engine .test-item:last-child');
+            if (lastTest) {
+              lastTest.className = 'test-item pass';
+              lastTest.querySelector('.status').className = 'status pass';
+              lastTest.querySelector('.status').textContent = 'PASS';
+              lastTest.querySelector('small').textContent = 'Stockfish initialized successfully';
+              results.pass++;
+            }
+          }
+        };
+
+        worker.onerror = (e) => {
+          console.error('[Engine Test] Worker error:', e);
+          if (!testCompleted) {
+            testCompleted = true;
+            worker.terminate();
+            const lastTest = document.querySelector('#test-engine .test-item:last-child');
+            if (lastTest) {
+              lastTest.className = 'test-item fail';
+              lastTest.querySelector('.status').className = 'status fail';
+              lastTest.querySelector('.status').textContent = 'FAIL';
+              lastTest.querySelector('small').textContent = `Worker error: ${e.message}`;
+              results.fail++;
+            }
+          }
+        };
+
+        worker.postMessage('uci');
+        worker.postMessage('isready');
+
+        // Timeout after 10 seconds (increased from 5)
+        setTimeout(() => {
+          if (!engineReady && !testCompleted) {
+            testCompleted = true;
+            worker.terminate();
+            const lastTest = document.querySelector('#test-engine .test-item:last-child');
+            if (lastTest) {
+              lastTest.className = 'test-item fail';
+              lastTest.querySelector('.status').className = 'status fail';
+              lastTest.querySelector('.status').textContent = 'FAIL';
+              lastTest.querySelector('small').textContent = 'Timeout waiting for engine (CDN may be slow)';
+              results.fail++;
+            }
+          }
+        }, 10000);
+      } catch (e) {
+        const lastTest = document.querySelector('#test-engine .test-item:last-child');
+        if (lastTest) {
+          lastTest.className = 'test-item fail';
+          lastTest.querySelector('.status').className = 'status fail';
+          lastTest.querySelector('.status').textContent = 'FAIL';
+          lastTest.querySelector('small').textContent = e.message;
+          results.fail++;
+        }
+      }
+    }
+
+    async function testChessLogic() {
+      // Test Chess.js functionality
+      const chess = new Chess();
+
+      addTest('test-chess-logic', 'Chess.js can create new game', chess ? 'pass' : 'fail');
+      addTest('test-chess-logic', 'Initial position is correct', chess.fen() === 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1' ? 'pass' : 'fail');
+
+      // Test legal moves
+      const moves = chess.moves();
+      addTest('test-chess-logic', 'Can generate legal moves', moves.length === 20 ? 'pass' : 'fail', `Found ${moves.length} moves`);
+
+      // Test making a move
+      const moveResult = chess.move('e4');
+      addTest('test-chess-logic', 'Can make a move (e4)', moveResult !== null ? 'pass' : 'fail', moveResult ? `Move: ${moveResult.san}` : 'Move failed');
+
+      // Test special moves - Castling
+      chess.load('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1');
+      const canCastle = chess.moves().includes('O-O');
+      addTest('test-chess-logic', 'Castling detection', canCastle ? 'pass' : 'fail');
+
+      // Test en passant
+      chess.load('rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 1');
+      const enPassantMoves = chess.moves({ verbose: true }).filter(m => m.flags.includes('e'));
+      addTest('test-chess-logic', 'En passant detection', enPassantMoves.length > 0 ? 'pass' : 'fail');
+
+      // Test checkmate detection
+      chess.load('rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 0 1');
+      addTest('test-chess-logic', 'Checkmate detection', chess.in_checkmate() ? 'pass' : 'fail');
+
+      // Test stalemate detection
+      chess.load('7k/8/6Q1/8/8/8/8/K7 b - - 0 1');
+      addTest('test-chess-logic', 'Stalemate detection', chess.in_stalemate() ? 'pass' : 'fail');
+    }
+
+    async function testPWA() {
+      addTest('test-pwa', 'Service Worker support', 'serviceWorker' in navigator ? 'pass' : 'fail');
+
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        addTest('test-pwa', 'Service Worker registered', registrations.length > 0 ? 'pass' : 'fail');
+      }
+
+      // Test manifest
+      try {
+        const response = await fetch('/manifest.json');
+        const manifest = await response.json();
+        addTest('test-pwa', 'Manifest file valid', manifest.name ? 'pass' : 'fail', manifest.name);
+        addTest('test-pwa', 'Manifest has icons', manifest.icons && manifest.icons.length > 0 ? 'pass' : 'fail', `${manifest.icons?.length || 0} icons`);
+      } catch (e) {
+        addTest('test-pwa', 'Manifest file valid', 'fail', e.message);
+      }
+
+      // Test icons
+      const iconSizes = [16, 32, 72, 96, 128, 144, 152, 192, 384, 512];
+      let iconsPassed = 0;
+      for (const size of iconSizes) {
+        try {
+          const response = await fetch(`/icons/icon-${size}x${size}.png`, { method: 'HEAD' });
+          if (response.ok) iconsPassed++;
+        } catch (e) {}
+      }
+      addTest('test-pwa', 'All icons present', iconsPassed === 10 ? 'pass' : 'fail', `${iconsPassed}/10 icons found`);
+
+      // Test cache
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        addTest('test-pwa', 'Cache API available', cacheNames.length > 0 ? 'pass' : 'fail', `${cacheNames.length} cache(s)`);
+      }
+    }
+
+    function updateSummary() {
+      const summary = document.getElementById('summary');
+      const percentage = Math.round((results.pass / results.total) * 100);
+
+      summary.innerHTML = `
+        <strong>Test Results:</strong><br>
+        ${results.pass} / ${results.total} tests passed (${percentage}%)<br>
+        ${results.fail > 0 ? `<span style="color: #e74c3c;">${results.fail} failed</span>` : '<span style="color: #3fb959;">All tests passed! ✅</span>'}
+      `;
+
+      summary.className = results.fail === 0 ? 'summary all-pass' : 'summary has-fail';
+    }
+
+    // Auto-run tests on load
+    setTimeout(runAllTests, 500);
+  </script>
+</body>
+</html>
+

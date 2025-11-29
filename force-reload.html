@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Force Reload Chess Puzzle Data</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 { color: #333; }
+    .step {
+      background: #e3f2fd;
+      padding: 15px;
+      margin: 15px 0;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+    }
+    .step h3 {
+      margin-top: 0;
+      color: #1976D2;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .danger {
+      background: #f44336;
+    }
+    .danger:hover {
+      background: #da190b;
+    }
+    #status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      display: none;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+    .puzzle-check {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔄 Force Reload Chess Puzzle Data</h1>
+    
+    <p><strong>Problem:</strong> Your browser is caching the old <code>data/puzzles.js</code> file, so you're still seeing the old puzzle errors.</p>
+    
+    <div class="step">
+      <h3>Step 1: Clear Browser Cache</h3>
+      <p><strong>Chrome/Edge:</strong></p>
+      <ol>
+        <li>Press <code>Ctrl+Shift+Delete</code> (Windows) or <code>Cmd+Shift+Delete</code> (Mac)</li>
+        <li>Select "Cached images and files"</li>
+        <li>Time range: "All time"</li>
+        <li>Click "Clear data"</li>
+      </ol>
+      <p><strong>Firefox:</strong></p>
+      <ol>
+        <li>Press <code>Ctrl+Shift+Delete</code> (Windows) or <code>Cmd+Shift+Delete</code> (Mac)</li>
+        <li>Select "Cache"</li>
+        <li>Time range: "Everything"</li>
+        <li>Click "Clear Now"</li>
+      </ol>
+      <button onclick="clearCache()">Try to Clear Cache (JavaScript)</button>
+    </div>
+
+    <div class="step">
+      <h3>Step 2: Hard Reload the Page</h3>
+      <p>After clearing cache, do a hard reload:</p>
+      <ul>
+        <li><strong>Chrome/Edge/Firefox:</strong> <code>Ctrl+Shift+R</code> (Windows) or <code>Cmd+Shift+R</code> (Mac)</li>
+        <li><strong>Alternative:</strong> Hold <code>Shift</code> and click the reload button</li>
+      </ul>
+      <button onclick="hardReload()">Hard Reload This Page</button>
+    </div>
+
+    <div class="step">
+      <h3>Step 3: Verify Puzzle Data Loaded</h3>
+      <p>Click the button below to load and check the puzzle data:</p>
+      <button onclick="checkPuzzles()">Check Puzzle Data</button>
+      <button class="danger" onclick="forceReloadPuzzles()">Force Reload Puzzles (Bypass Cache)</button>
+    </div>
+
+    <div class="puzzle-check" id="puzzleInfo" style="display:none;">
+      <h3>Puzzle Data Status:</h3>
+      <div id="puzzleDetails"></div>
+    </div>
+
+    <div id="status"></div>
+
+    <div class="step">
+      <h3>Step 4: Open Main App</h3>
+      <p>After completing the above steps, open your main app:</p>
+      <button onclick="openMainApp()">Open Chess Puzzle App</button>
+    </div>
+  </div>
+
+  <script>
+    function showStatus(message, isSuccess) {
+      const status = document.getElementById('status');
+      status.textContent = message;
+      status.className = isSuccess ? 'success' : 'error';
+      status.style.display = 'block';
+      setTimeout(() => {
+        status.style.display = 'none';
+      }, 5000);
+    }
+
+    function clearCache() {
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => {
+            caches.delete(name);
+          });
+        });
+        showStatus('✓ Cache cleared via JavaScript. Now clear browser cache manually (Step 1).', true);
+      } else {
+        showStatus('⚠ JavaScript cache API not available. Please clear cache manually (Step 1).', false);
+      }
+    }
+
+    function hardReload() {
+      location.reload(true);
+    }
+
+    function forceReloadPuzzles() {
+      const timestamp = new Date().getTime();
+      const script = document.createElement('script');
+      script.src = `data/puzzles.js?nocache=${timestamp}`;
+      script.onload = () => {
+        showStatus('✓ Puzzles reloaded! Check the data below.', true);
+        checkPuzzles();
+      };
+      script.onerror = () => {
+        showStatus('✗ Failed to load puzzles. Make sure you are running a local server.', false);
+      };
+      document.body.appendChild(script);
+    }
+
+    function checkPuzzles() {
+      const timestamp = new Date().getTime();
+      fetch(`data/puzzles.js?nocache=${timestamp}`, { cache: 'no-store' })
+        .then(response => response.text())
+        .then(text => {
+          // Check for specific puzzle IDs that were fixed
+          const checks = [
+            { id: 'mate-epaulette-2', fen: '3rkr2/8/8/8/8/8/1K6/4Q3', found: text.includes('3rkr2/8/8/8/8/8/1K6/4Q3') },
+            { id: 'mate-smothered-2', fen: 'kr6/pp6/N7', found: text.includes('kr6/pp6/N7') },
+            { id: 'mate-arabian-1', fen: '7k/6pp/7N/8/8/8/8/R6K', found: text.includes('7k/6pp/7N/8/8/8/8/R6K') },
+            { id: 'mate-boden-1', fen: '2kr4/p1pp4/8/8/8/2B5/8/B6K', found: text.includes('2kr4/p1pp4/8/8/8/2B5/8/B6K') }
+          ];
+
+          const puzzleInfo = document.getElementById('puzzleInfo');
+          const puzzleDetails = document.getElementById('puzzleDetails');
+          puzzleInfo.style.display = 'block';
+
+          let html = '<ul>';
+          let allFound = true;
+          checks.forEach(check => {
+            const status = check.found ? '✓' : '✗';
+            const color = check.found ? 'green' : 'red';
+            html += `<li style="color: ${color}"><strong>${status} ${check.id}</strong>: ${check.found ? 'UPDATED' : 'OLD VERSION'}</li>`;
+            if (!check.found) allFound = false;
+          });
+          html += '</ul>';
+
+          if (allFound) {
+            html += '<p style="color: green; font-weight: bold;">✓ All puzzle fixes are present! The file is updated.</p>';
+            html += '<p>If you still see errors in the main app, try:</p>';
+            html += '<ol><li>Close ALL browser tabs</li><li>Clear cache again</li><li>Restart browser</li><li>Open app fresh</li></ol>';
+            showStatus('✓ Puzzle data is UPDATED! File contains all fixes.', true);
+          } else {
+            html += '<p style="color: red; font-weight: bold;">✗ Some puzzles still show OLD data!</p>';
+            html += '<p>Your browser is still loading cached data. Try:</p>';
+            html += '<ol><li>Close this tab</li><li>Clear browser cache (Ctrl+Shift+Delete)</li><li>Restart browser</li><li>Open this page again</li></ol>';
+            showStatus('✗ Browser is still loading OLD cached data!', false);
+          }
+
+          puzzleDetails.innerHTML = html;
+        })
+        .catch(err => {
+          showStatus('✗ Error loading puzzles: ' + err.message, false);
+        });
+    }
+
+    function openMainApp() {
+      window.open('index.html?v=' + new Date().getTime(), '_blank');
+    }
+
+    // Auto-check on load
+    window.addEventListener('load', () => {
+      setTimeout(checkPuzzles, 500);
+    });
+  </script>
+</body>
+</html>
+

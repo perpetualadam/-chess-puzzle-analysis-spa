@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#3fb959"/>
+  
+  <!-- Chess Knight Silhouette -->
+  <path d="M 256 100 L 280 120 L 300 150 L 310 180 L 320 220 L 330 260 L 340 300 L 350 340 L 360 380 L 370 420 L 380 460 L 400 480 L 420 490 L 440 495 L 460 498 L 480 500 L 480 512 L 32 512 L 32 500 L 50 498 L 70 495 L 90 490 L 110 480 L 130 460 L 140 420 L 145 380 L 148 340 L 150 300 L 155 260 L 165 220 L 180 180 L 200 150 L 220 130 L 240 115 Z" fill="#ffffff"/>
+  
+  <!-- Eye -->
+  <circle cx="280" cy="200" r="15" fill="#3fb959"/>
+</svg>
+

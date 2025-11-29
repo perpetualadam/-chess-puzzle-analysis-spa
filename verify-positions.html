@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify Test Positions</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1f2e; color: #e0e6ed; }
+    .position { background: #252d3f; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .pass { border-left: 4px solid #3fb959; }
+    .fail { border-left: 4px solid #e74c3c; }
+  </style>
+</head>
+<body>
+  <h1>Position Verification</h1>
+  <div id="results"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script>
+    const positions = [
+      {
+        name: 'Mate in 1 - Back Rank',
+        fen: '6k1/5ppp/8/8/8/8/5PPP/Q5K1 w - - 0 1',
+        testMoves: ['Qa8#', 'a1a8']
+      },
+      {
+        name: 'Mate in 1 - Scholar\'s Mate',
+        fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1',
+        testMoves: ['Qxf7#', 'h5f7']
+      },
+      {
+        name: 'Mate in 1 - Fool\'s Mate',
+        fen: 'rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq - 0 1',
+        testMoves: ['Qh4#', 'd8h4']
+      },
+      {
+        name: 'Mate in 1 - King and Queen vs King',
+        fen: '7k/8/6K1/8/8/8/8/Q7 w - - 0 1',
+        testMoves: ['Qh1#', 'a1h1']
+      }
+    ];
+
+    const resultsDiv = document.getElementById('results');
+
+    positions.forEach(pos => {
+      const chess = new Chess(pos.fen);
+      const div = document.createElement('div');
+      div.className = 'position';
+      
+      let html = `<h3>${pos.name}</h3>`;
+      html += `<p>FEN: ${pos.fen}</p>`;
+      html += `<p>Legal moves: ${chess.moves().join(', ')}</p>`;
+      
+      let foundMate = false;
+      pos.testMoves.forEach(move => {
+        try {
+          const testChess = new Chess(pos.fen);
+
+          // Try both SAN notation (Qa8#) and UCI notation (a1a8)
+          let result = testChess.move(move);
+
+          // If SAN fails, try UCI notation
+          if (!result && move.length === 4) {
+            const from = move.substring(0, 2);
+            const to = move.substring(2, 4);
+            result = testChess.move({ from: from, to: to });
+          }
+
+          if (result) {
+            const isMate = testChess.in_checkmate();
+            const notation = result.san || move;
+            html += `<p>✓ ${move} (${notation}) is legal. Checkmate: ${isMate ? 'YES ✓' : 'NO ✗'}</p>`;
+            if (isMate) foundMate = true;
+          } else {
+            html += `<p>✗ ${move} is ILLEGAL</p>`;
+          }
+        } catch (e) {
+          html += `<p>✗ ${move} - Error: ${e.message}</p>`;
+        }
+      });
+      
+      div.className = foundMate ? 'position pass' : 'position fail';
+      div.innerHTML = html;
+      resultsDiv.appendChild(div);
+    });
+  </script>
+</body>
+</html>
+

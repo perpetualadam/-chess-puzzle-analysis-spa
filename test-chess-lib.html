@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess.js Library Test</title>
+</head>
+<body>
+  <h1>Chess.js Library Test</h1>
+  <div id="output"></div>
+
+  <!-- Test chess.js loading -->
+  <script src="https://cdn.jsdelivr.net/npm/chess.js@1.0.0/dist/chess.min.js"></script>
+  <script>
+    const output = document.getElementById('output');
+    
+    // Test if Chess is defined
+    if (typeof Chess === 'undefined') {
+      output.innerHTML = '<p style="color: red;">❌ ERROR: Chess is not defined. Library failed to load.</p>';
+      console.error('Chess.js library failed to load from CDN');
+    } else {
+      output.innerHTML = '<p style="color: green;">✅ SUCCESS: Chess is defined</p>';
+      
+      // Test creating a Chess instance
+      try {
+        const chess = new Chess();
+        output.innerHTML += '<p style="color: green;">✅ SUCCESS: Chess instance created</p>';
+        output.innerHTML += '<p>Initial FEN: ' + chess.fen() + '</p>';
+        
+        // Test making a move
+        const move = chess.move('e4');
+        if (move) {
+          output.innerHTML += '<p style="color: green;">✅ SUCCESS: Move e4 executed</p>';
+          output.innerHTML += '<p>New FEN: ' + chess.fen() + '</p>';
+        } else {
+          output.innerHTML += '<p style="color: red;">❌ ERROR: Move failed</p>';
+        }
+      } catch (e) {
+        output.innerHTML += '<p style="color: red;">❌ ERROR: ' + e.message + '</p>';
+        console.error('Chess.js error:', e);
+      }
+    }
+  </script>
+</body>
+</html>
+

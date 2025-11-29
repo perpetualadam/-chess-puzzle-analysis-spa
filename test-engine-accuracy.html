@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engine Accuracy Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #1a1f2e;
+      color: #e0e6ed;
+    }
+    h1 { color: #3fb959; }
+    .test-case {
+      background: #252d3f;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border-left: 4px solid #3fb959;
+    }
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .pass { background: #27ae60; color: white; }
+    .fail { background: #e74c3c; color: white; }
+    .pending { background: #f39c12; color: white; }
+    button {
+      background: #3fb959;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    button:hover { background: #35a04d; }
+    pre {
+      background: #1a1f2e;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Chess Engine Accuracy Test</h1>
+  <p>Testing Stockfish engine with known positions and solutions.</p>
+
+  <button onclick="runTests()">▶️ Run Engine Tests</button>
+  <button onclick="location.href='/'">🏠 Go to App</button>
+
+  <div id="results"></div>
+
+  <script src="js/engine.js"></script>
+  <script>
+    const testCases = [
+      {
+        name: 'Mate in 1 - Back Rank',
+        fen: '6k1/5ppp/8/8/8/8/5PPP/Q5K1 w - - 0 1',
+        expectedMoves: ['a1a8'],
+        description: 'Simple back rank mate with queen',
+        depth: 8,
+        isMate: true
+      },
+      {
+        name: 'Mate in 1 - Scholar\'s Mate',
+        fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1',
+        expectedMoves: ['h5f7'],
+        description: 'Immediate checkmate on f7',
+        depth: 8,
+        isMate: true
+      },
+      {
+        name: 'Mate in 1 - Fool\'s Mate Setup',
+        fen: 'rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq - 0 1',
+        expectedMoves: ['d8h4'],
+        description: 'Queen delivers checkmate (Fool\'s Mate)',
+        depth: 8,
+        isMate: true
+      },
+      {
+        name: 'Tactical Position - Best Move',
+        fen: 'r1bqk2r/pppp1ppp/2n2n2/4p3/3PP3/2P2N2/PP3PPP/RNBQKB1R w KQkq - 2 5',
+        expectedMoves: ['d4e5', 'd4d5'],
+        description: 'Strong central pawn move',
+        depth: 14,
+        isMate: false
+      },
+      {
+        name: 'Opening Position - Common Moves',
+        fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        expectedMoves: ['e2e4', 'd2d4', 'g1f3', 'c2c4'],
+        description: 'Common opening moves (e4, d4, Nf3, c4)',
+        depth: 16,
+        isMate: false
+      },
+      {
+        name: 'Endgame - King and Queen vs King',
+        fen: '7k/8/6K1/8/8/8/8/Q7 w - - 0 1',
+        expectedMoves: ['a1h1'],
+        description: 'Queen delivers checkmate',
+        depth: 8,
+        isMate: true
+      }
+    ];
+
+    let engine;
+    let testResults = [];
+
+    async function runTests() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<h2>Running Tests...</h2>';
+      testResults = [];
+
+      // Initialize engine
+      engine = new EngineController('workers/stockfish.worker.js');
+      engine.start();
+
+      // Wait for engine to be ready
+      await new Promise(resolve => {
+        const checkReady = setInterval(() => {
+          if (engine.ready) {
+            clearInterval(checkReady);
+            resolve();
+          }
+        }, 100);
+      });
+
+      // Run each test
+      for (const testCase of testCases) {
+        await runTest(testCase);
+      }
+
+      // Display results
+      displayResults();
+
+      // Stop engine
+      engine.stop();
+    }
+
+    async function runTest(testCase) {
+      const resultDiv = document.createElement('div');
+      resultDiv.className = 'test-case';
+      resultDiv.innerHTML = `
+        <h3>${testCase.name}</h3>
+        <p>${testCase.description}</p>
+        <pre>FEN: ${testCase.fen}</pre>
+        <div class="result pending">⏳ Analyzing...</div>
+      `;
+      document.getElementById('results').appendChild(resultDiv);
+
+      try {
+        // Request evaluation with appropriate depth
+        const depth = testCase.depth || 18;
+        const lines = await engine.requestEval(testCase.fen, depth, 3);
+        
+        if (!lines || lines.length === 0) {
+          throw new Error('No lines returned from engine');
+        }
+
+        const bestLine = lines[0];
+        const bestMove = bestLine.pv ? bestLine.pv.split(' ')[0] : '';
+
+        // Check if the best move matches any expected move
+        const isCorrect = testCase.expectedMoves.some(expected => {
+          const normalizedExpected = expected.toLowerCase().replace(/[+#x]/g, '');
+          const normalizedBest = bestMove.toLowerCase().replace(/[+#x]/g, '');
+          return normalizedBest === normalizedExpected ||
+                 normalizedBest.includes(normalizedExpected) ||
+                 normalizedExpected.includes(normalizedBest);
+        });
+
+        // For mate positions, also check if engine found a mate
+        const foundMate = bestLine.score && bestLine.score.type === 'mate';
+        const shouldBeMate = testCase.isMate === true;
+
+        const resultEl = resultDiv.querySelector('.result');
+
+        // Pass if move is correct OR (for mate positions) if engine found any mate
+        const testPassed = isCorrect || (shouldBeMate && foundMate);
+
+        if (testPassed) {
+          resultEl.className = 'result pass';
+          resultEl.innerHTML = `✅ PASS - Found: ${bestMove}`;
+          if (bestLine.score) {
+            if (bestLine.score.type === 'mate') {
+              resultEl.innerHTML += ` (Mate in ${Math.abs(bestLine.score.value)})`;
+            } else {
+              resultEl.innerHTML += ` (Eval: ${(bestLine.score.value / 100).toFixed(2)})`;
+            }
+          }
+          if (!isCorrect && shouldBeMate && foundMate) {
+            resultEl.innerHTML += ` <small>(Different mate found, but still correct)</small>`;
+          }
+          testResults.push({ name: testCase.name, pass: true, move: bestMove });
+        } else {
+          resultEl.className = 'result fail';
+          resultEl.innerHTML = `❌ FAIL - Expected: ${testCase.expectedMoves.join(' or ')}, Got: ${bestMove}`;
+          if (shouldBeMate && !foundMate) {
+            resultEl.innerHTML += ` <small>(Should be mate but engine didn't find it)</small>`;
+          }
+          testResults.push({ name: testCase.name, pass: false, move: bestMove, expected: testCase.expectedMoves });
+        }
+
+        // Show all lines
+        const linesHtml = lines.map((line, i) => {
+          const score = line.score ? 
+            (line.score.type === 'mate' ? `M${line.score.value}` : `${(line.score.value / 100).toFixed(2)}`) : 
+            '?';
+          return `${i + 1}. ${line.pv || '?'} (${score})`;
+        }).join('<br>');
+        resultEl.innerHTML += `<br><small>All lines:<br>${linesHtml}</small>`;
+
+      } catch (error) {
+        const resultEl = resultDiv.querySelector('.result');
+        resultEl.className = 'result fail';
+        resultEl.innerHTML = `❌ ERROR - ${error.message}`;
+        testResults.push({ name: testCase.name, pass: false, error: error.message });
+      }
+    }
+
+    function displayResults() {
+      const passed = testResults.filter(r => r.pass).length;
+      const total = testResults.length;
+      const percentage = Math.round((passed / total) * 100);
+
+      const summaryDiv = document.createElement('div');
+      summaryDiv.className = 'test-case';
+      summaryDiv.style.borderLeft = passed === total ? '4px solid #27ae60' : '4px solid #e74c3c';
+      summaryDiv.innerHTML = `
+        <h2>📊 Test Summary</h2>
+        <p><strong>${passed} / ${total} tests passed (${percentage}%)</strong></p>
+        ${passed === total ? 
+          '<p style="color: #27ae60;">✅ All engine accuracy tests passed! The chess engine is working correctly.</p>' : 
+          '<p style="color: #e74c3c;">⚠️ Some tests failed. Please review the results above.</p>'
+        }
+      `;
+      document.getElementById('results').insertBefore(summaryDiv, document.getElementById('results').firstChild);
+    }
+  </script>
+</body>
+</html>
+
