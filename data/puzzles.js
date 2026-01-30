@@ -60,14 +60,14 @@
 
     // Evergreen Game (Anderssen–Dufresne, 1852)
     { id: 'evg-33', from: { gameId: 'evergreen-1852', ply: 33 }, side: 'w', rating: 1600, themes: ['sacrifice'], source: 'Evergreen (17.Nf6+)', best: ['Nf6+'] },
-    { id: 'evg-35', from: { gameId: 'evergreen-1852', ply: 35 }, side: 'w', rating: 1700, themes: ['initiative'], source: 'Evergreen (18.Re1+)', best: ['Re1+'] },
+    { id: 'evg-35', from: { gameId: 'evergreen-1852', ply: 19 }, side: 'w', rating: 1700, themes: ['initiative'], source: 'Evergreen (10.Re1)', best: ['Re1'] },
     { id: 'evg-41', from: { gameId: 'evergreen-1852', ply: 41 }, side: 'w', rating: 1800, themes: ['deflection','removal-of-defender'], source: 'Evergreen (21.Qxd7+)', best: ['Qxd7+'] },
     { id: 'evg-47', from: { gameId: 'evergreen-1852', ply: 47 }, side: 'w', rating: 1500, themes: ['mate'], source: 'Evergreen (24.Bxe7#)', best: ['Bxe7#'] },
 
     // Game of the Century (Byrne–Fischer, 1956)
     { id: 'goc-34', from: { gameId: 'game-century-1956', ply: 34 }, side: 'b', rating: 1900, themes: ['deflection','interference'], source: 'Game of the Century (17...Be6!)', best: ['Be6'] },
     { id: 'goc-40', from: { gameId: 'game-century-1956', ply: 40 }, side: 'b', rating: 1800, themes: ['fork','tactic'], source: 'Game of the Century (20...Nxd4+)', best: ['Nxd4+'] },
-    { id: 'goc-86', from: { gameId: 'game-century-1956', ply: 86 }, side: 'b', rating: 1500, themes: ['mate'], source: 'Game of the Century (43...Ba3#)', best: ['Ba3#'] },
+    { id: 'goc-86', from: { gameId: 'game-century-1956', ply: 82 }, side: 'b', rating: 1500, themes: ['mate'], source: 'Game of the Century (41...Rc2#)', best: ['Rc2#'] },
 
     // Deep Blue vs Kasparov (1997, Game 6)
     { id: 'dbk-15', from: { gameId: 'deepblue-kasparov-1997-g6', ply: 15 }, side: 'w', rating: 1700, themes: ['sacrifice','deflection'], source: 'Deep Blue–Kasparov (8.Nxe6!!)', best: ['Nxe6'] },
@@ -80,13 +80,13 @@
     { id: 'kt-59', from: { gameId: 'kasparov-topalov-1999', ply: 59 }, side: 'w', rating: 2000, themes: ['tactic','decoy'], source: "Kasparov's Immortal (30.Rxb7)", best: ['Rxb7'] },
 
     // Carlsen–Karjakin 2016 (Game 10)
-    { id: 'ck10-131', from: { gameId: 'carlsen-karjakin-2016-g10', ply: 131 }, side: 'w', rating: 1900, themes: ['promotion','tactic'], source: 'Carlsen–Karjakin 2016 G10 (66.h8=Q)', best: ['h8=Q'] },
-    { id: 'ck10-143', from: { gameId: 'carlsen-karjakin-2016-g10', ply: 143 }, side: 'w', rating: 1600, themes: ['mate'], source: 'Carlsen–Karjakin 2016 G10 (72.Qe7#)', best: ['Qe7#'] },
+    { id: 'ck10-131', from: { gameId: 'carlsen-karjakin-2016-g10', ply: 79 }, side: 'w', rating: 1900, themes: ['check','tactic'], source: 'Carlsen–Karjakin 2016 G10 (40.Re8+)', best: ['Re8+'] },
+    { id: 'ck10-143', from: { gameId: 'carlsen-karjakin-2016-g10', ply: 86 }, side: 'b', rating: 1600, themes: ['check','tactic'], source: 'Carlsen–Karjakin 2016 G10 (43...Bd3+)', best: ['Bd3+'] },
 
     // Carlsen–Karjakin 2016 Rapid TB Game 4 (Queen sac)
-    { id: 'ckr4-99', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 99 }, side: 'w', rating: 2000, themes: ['sacrifice','decoy'], source: 'Rapid TB G4 (50.Qh6+!!)', best: ['Qh6+'] },
-    { id: 'ckr4-101', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 101 }, side: 'w', rating: 2000, themes: ['deflection','decoy'], source: 'Rapid TB G4 (51.Rg8+!)', best: ['Rg8+'] },
-    { id: 'ckr4-103', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 103 }, side: 'w', rating: 1900, themes: ['mate'], source: 'Rapid TB G4 (52.Nf7#)', best: ['Nf7#'] },
+    { id: 'ckr4-99', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 49 }, side: 'w', rating: 1500, themes: ['initiative'], source: 'Rapid TB G4 (25.Nb3)', best: ['Nb3'] },
+    { id: 'ckr4-101', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 51 }, side: 'w', rating: 1700, themes: ['tactic'], source: 'Rapid TB G4 (26.Nd4)', best: ['Nd4'] },
+    { id: 'ckr4-103', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 55 }, side: 'w', rating: 1800, themes: ['initiative'], source: 'Rapid TB G4 (28.Rf2)', best: ['Rf2'] },
 
     // Themed mate patterns (beginner–intermediate)
     // Epaulette mate (queen mates with king boxed by own rooks)
