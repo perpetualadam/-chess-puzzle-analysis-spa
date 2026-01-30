@@ -20,7 +20,7 @@
     { id: 'fork-1', fen: 'r1bqk2r/pppp1ppp/2n2n2/4p3/3PP3/2P2N2/PP3PPP/RNBQKB1R w KQkq - 2 5', side: 'w', rating: 900, themes: ['fork'], source: 'Practice', best: ['d5'] },
     { id: 'pin-1', fen: 'r1bqkbnr/pp1ppppp/2n5/2p5/8/2N2N2/PPPPPPPP/R1BQKB1R w KQkq - 2 3', side: 'w', rating: 800, themes: ['pin'], source: 'Practice', best: ['d4'] },
     { id: 'disc-1', fen: 'rnb1kbnr/ppppqppp/8/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 4', side: 'w', rating: 1000, themes: ['discovered'], source: 'Practice', best: ['Bxf7+'] },
-    { id: 'mate1-2', fen: '6k1/8/8/5Q2/8/8/5PPP/6K1 w - - 0 1', side: 'w', rating: 500, themes: ['mate'], source: 'Practice', best: ['Qg5#','Qc8#'] },
+    { id: 'mate1-2', fen: '6k1/5ppp/8/5Q2/8/8/5PPP/6K1 w - - 0 1', side: 'w', rating: 500, themes: ['mate'], source: 'Practice', best: ['Qc8#'] },
 
     // Daily rotation samples (more can be added)
     { id: 'daily-a', from: gameRef('opera-1858', 20), side: 'w', rating: 1100, themes: ['initiative'], source: 'Daily pool' },
@@ -30,17 +30,15 @@
     { id: 'skewer-1', fen: 'r3k2r/pp3ppp/2p5/4n3/2B5/2P2Q2/P4PPP/R3R1K1 w kq - 0 1', side: 'w', rating: 1200, themes: ['skewer'], source: 'Practice', best: ['Qxf7+'] },
     { id: 'deflection-1', fen: 'r1bq1rk1/ppp2ppp/2n2n2/3pp3/3P4/2P1PN2/PP1NBPPP/R1BQ1RK1 w - - 0 7', side: 'w', rating: 1300, themes: ['deflection'], source: 'Practice', best: ['dxe5'] },
     { id: 'overload-1', fen: 'r2q1rk1/ppp2pbp/2n3p1/3np3/3P4/2P1PN2/PP1NBPPP/R1BQR1K1 w - - 0 10', side: 'w', rating: 1400, themes: ['overloading'], source: 'Practice', best: ['e4'] },
-    { id: 'decoy-1', fen: 'r1bq1rk1/ppp2ppp/2n2n2/3p4/3P4/2P1PN2/PP1NBPPP/R1BQ1RK1 b - - 0 7', side: 'b', rating: 1200, themes: ['decoy'], source: 'Practice', best: ['Qh2+'] },
+    { id: 'decoy-1', fen: 'r1b2rk1/ppp2ppp/2n2n2/3p4/3P3q/2P1PN2/PP1NBPPP/R1BQ1RK1 b - - 0 7', side: 'b', rating: 1200, themes: ['decoy'], source: 'Practice', best: ['Qxh2+'] },
     { id: 'sac-1', fen: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/1P2P3/P1N2N2/2PP1PPP/R1BQKB1R w KQkq - 0 6', side: 'w', rating: 1500, themes: ['sacrifice','initiative'], source: 'Practice', best: ['bxc5'] },
     { id: 'zwischen-1', fen: 'r2q1rk1/pp2bppp/2n2n2/2pp4/3P4/2P1PN2/PP1NBPPP/R1BQR1K1 w - - 0 9', side: 'w', rating: 1600, themes: ['zwischenzug'], source: 'Practice', best: ['dxc5'] },
     { id: 'removal-1', fen: 'r1bqk2r/ppp2ppp/2n2n2/3pp3/3P4/2P1PN2/PP1NBPPP/R1BQ1RK1 w kq - 0 7', side: 'w', rating: 1300, themes: ['removal-of-defender'], source: 'Practice', best: ['dxe5'] },
-    { id: 'interference-1', fen: 'r1bq1rk1/ppp2ppp/2n2n2/3p4/3P4/2P1PN2/PP1NBPPP/R1BQ1RK1 w - - 0 7', side: 'w', rating: 1350, themes: ['interference'], source: 'Practice', best: ['dxc5'] },
+    { id: 'interference-1', fen: 'r1bq1rk1/ppp2ppp/2n2n2/2pp4/3P4/2P1PN2/PP1NBPPP/R1BQ1RK1 w - - 0 7', side: 'w', rating: 1350, themes: ['interference'], source: 'Practice', best: ['dxc5'] },
     { id: 'mate-net-1', fen: '6k1/5ppp/8/8/2Q5/8/5PPP/6K1 w - - 0 1', side: 'w', rating: 800, themes: ['mate'], source: 'Practice', best: ['Qc8#'] },
-    { id: 'back-rank-1', fen: '6k1/5ppp/8/8/8/8/5PPP/5RK1 b - - 0 1', side: 'b', rating: 900, themes: ['back-rank'], source: 'Practice', best: ['Qxf1+'] },
+    { id: 'back-rank-1', fen: '6k1/5ppp/8/8/8/8/4qPPP/5RK1 b - - 0 1', side: 'b', rating: 900, themes: ['back-rank'], source: 'Practice', best: ['Qxf1+'] },
     { id: 'pin-2', fen: 'rnbqk2r/pppp1ppp/5n2/4p3/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 2 3', side: 'w', rating: 900, themes: ['pin'], source: 'Practice', best: ['dxe5'] },
     { id: 'fork-2', fen: 'r1bqk2r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 4', side: 'w', rating: 950, themes: ['fork'], source: 'Practice', best: ['Ng5'] },
-
-    ,
     // Immortal Game (Anderssen–Kieseritzky, 1851)
     { id: 'imm-35', from: { gameId: 'immortal-1851', ply: 35 }, side: 'w', rating: 1700, themes: ['sacrifice','deflection'], source: 'Immortal Game (18.Bd6!)', best: ['Bd6'] },
     { id: 'imm-43', from: { gameId: 'immortal-1851', ply: 43 }, side: 'w', rating: 1600, themes: ['sacrifice','decoy'], source: 'Immortal Game (22.Qf6+)', best: ['Qf6+'] },
