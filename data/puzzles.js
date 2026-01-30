@@ -11,6 +11,20 @@
     { id: 'op-13', from: gameRef('opera-1858', 26), side: 'w', rating: 1200, themes: ['sacrifice','tactic'], source: 'Morphy - Opera (move 13)' },
     { id: 'op-17', from: gameRef('opera-1858', 34), side: 'w', rating: 1500, themes: ['mate','decoy'], source: 'Morphy - Opera (mate)'} ,
 
+    // Step-by-step sequences from famous games (build to the finish)
+    { id: 'opera-step-1', from: gameRef('opera-1858', 17), side: 'w', rating: 900, themes: ['pin','initiative'], source: 'Opera Game — Step 1/4 (9.Bg5)', best: ['Bg5'] },
+    { id: 'opera-step-2', from: gameRef('opera-1858', 21), side: 'w', rating: 1100, themes: ['tactic','check'], source: 'Opera Game — Step 2/4 (11.Bxb5+)', best: ['Bxb5+'] },
+    { id: 'opera-step-3', from: gameRef('opera-1858', 25), side: 'w', rating: 1400, themes: ['sacrifice'], source: 'Opera Game — Step 3/4 (13.Rxd7)', best: ['Rxd7'] },
+    { id: 'opera-mate', from: gameRef('opera-1858', 33), side: 'w', rating: 1800, themes: ['mate'], source: 'Opera Game — Finish (17.Rd8#)', best: ['Rd8#'] },
+
+    { id: 'immortal-step-1', from: gameRef('immortal-1851', 33), side: 'w', rating: 1400, themes: ['initiative','tactic'], source: 'Immortal Game — Step 1/3 (17.Nd5)', best: ['Nd5'] },
+    { id: 'immortal-step-2', from: gameRef('immortal-1851', 41), side: 'w', rating: 1700, themes: ['sacrifice','check'], source: 'Immortal Game — Step 2/3 (21.Nxg7+)', best: ['Nxg7+'] },
+    { id: 'immortal-mate', from: gameRef('immortal-1851', 45), side: 'w', rating: 2000, themes: ['mate'], source: 'Immortal Game — Finish (23.Be7#)', best: ['Be7#'] },
+
+    { id: 'evergreen-step-1', from: gameRef('evergreen-1852', 33), side: 'w', rating: 1500, themes: ['tactic','check'], source: 'Evergreen Game — Step 1/3 (17.Nf6+)', best: ['Nf6+'] },
+    { id: 'evergreen-step-2', from: gameRef('evergreen-1852', 39), side: 'w', rating: 1700, themes: ['sacrifice','check'], source: 'Evergreen Game — Step 2/3 (20.Rxe7+)', best: ['Rxe7+'] },
+    { id: 'evergreen-mate', from: gameRef('evergreen-1852', 47), side: 'w', rating: 1900, themes: ['mate'], source: 'Evergreen Game — Finish (24.Bxe7#)', best: ['Bxe7#'] },
+
     // Simple classics
     { id: 'fool-3', from: gameRef('fools-1858', 4), side: 'b', rating: 400, themes: ['mate'], source: "Fool's Mate", best: ['Qh4#'] },
     { id: 'sch-4', from: gameRef('scholars-?', 7), side: 'w', rating: 600, themes: ['mate'], source: "Scholar's Mate", best: ['Qxf7#'] },
