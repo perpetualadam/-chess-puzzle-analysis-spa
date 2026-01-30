@@ -80,13 +80,13 @@
     { id: 'kt-59', from: { gameId: 'kasparov-topalov-1999', ply: 59 }, side: 'w', rating: 2000, themes: ['tactic','decoy'], source: "Kasparov's Immortal (30.Rxb7)", best: ['Rxb7'] },
 
     // Carlsen–Karjakin 2016 (Game 10)
-    { id: 'ck10-131', from: { gameId: 'carlsen-karjakin-2016-g10', ply: 79 }, side: 'w', rating: 1900, themes: ['check','tactic'], source: 'Carlsen–Karjakin 2016 G10 (40.Re8+)', best: ['Re8+'] },
-    { id: 'ck10-143', from: { gameId: 'carlsen-karjakin-2016-g10', ply: 86 }, side: 'b', rating: 1600, themes: ['check','tactic'], source: 'Carlsen–Karjakin 2016 G10 (43...Bd3+)', best: ['Bd3+'] },
+    { id: 'ck10-131', from: { gameId: 'carlsen-karjakin-2016-g10', ply: 73 }, side: 'w', rating: 1900, themes: ['check','tactic'], source: 'Carlsen–Karjakin 2016 G10 (37.e5+)', best: ['e5+'] },
+    { id: 'ck10-143', from: { gameId: 'carlsen-karjakin-2016-g10', ply: 133 }, side: 'w', rating: 2000, themes: ['check','endgame'], source: 'Carlsen–Karjakin 2016 G10 (67.Nd6+)', best: ['Nd6+'] },
 
-    // Carlsen–Karjakin 2016 Rapid TB Game 4 (Queen sac)
-    { id: 'ckr4-99', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 49 }, side: 'w', rating: 1500, themes: ['initiative'], source: 'Rapid TB G4 (25.Nb3)', best: ['Nb3'] },
-    { id: 'ckr4-101', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 51 }, side: 'w', rating: 1700, themes: ['tactic'], source: 'Rapid TB G4 (26.Nd4)', best: ['Nd4'] },
-    { id: 'ckr4-103', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 55 }, side: 'w', rating: 1800, themes: ['initiative'], source: 'Rapid TB G4 (28.Rf2)', best: ['Rf2'] },
+    // Carlsen–Karjakin 2016 Rapid TB Game 4 (decisive checks)
+    { id: 'ckr4-99', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 91 }, side: 'w', rating: 1600, themes: ['initiative'], source: 'Rapid TB G4 (46.Rc1)', best: ['Rc1'] },
+    { id: 'ckr4-101', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 97 }, side: 'w', rating: 1800, themes: ['check','tactic'], source: 'Rapid TB G4 (49.Rc8+)', best: ['Rc8+'] },
+    { id: 'ckr4-103', from: { gameId: 'carlsen-karjakin-2016-rapid-g4', ply: 99 }, side: 'w', rating: 2000, themes: ['check','attack'], source: 'Rapid TB G4 (50.Qh6+)', best: ['Qh6+'] },
 
     // Themed mate patterns (beginner–intermediate)
     // Epaulette mate (queen mates with king boxed by own rooks)
