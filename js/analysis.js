@@ -12,20 +12,6 @@
     'P': 1, 'N': 3, 'B': 3, 'R': 5, 'Q': 9, 'K': 0
   };
 
-  // Piece image URLs (using chessboardjs.com CDN)
-  const PIECE_IMAGES = {
-    'p': 'https://chessboardjs.com/img/chesspieces/wikipedia/bP.png',
-    'n': 'https://chessboardjs.com/img/chesspieces/wikipedia/bN.png',
-    'b': 'https://chessboardjs.com/img/chesspieces/wikipedia/bB.png',
-    'r': 'https://chessboardjs.com/img/chesspieces/wikipedia/bR.png',
-    'q': 'https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png',
-    'P': 'https://chessboardjs.com/img/chesspieces/wikipedia/wP.png',
-    'N': 'https://chessboardjs.com/img/chesspieces/wikipedia/wN.png',
-    'B': 'https://chessboardjs.com/img/chesspieces/wikipedia/wB.png',
-    'R': 'https://chessboardjs.com/img/chesspieces/wikipedia/wR.png',
-    'Q': 'https://chessboardjs.com/img/chesspieces/wikipedia/wQ.png'
-  };
-
   function setupChart(){
     const ctx = document.getElementById('eval-chart').getContext('2d');
     chart = new Chart(ctx, {
@@ -93,13 +79,21 @@
     const whiteCapturedDiv = $('#white-captured');
     const blackCapturedDiv = $('#black-captured');
 
-    whiteCapturedDiv.innerHTML = capturedByWhite.map(p =>
-      `<div class="captured-piece" style="background-image: url('${PIECE_IMAGES[p]}')"></div>`
-    ).join('');
+    whiteCapturedDiv.innerHTML = '';
+    capturedByWhite.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'captured-piece';
+      div.setAttribute('data-piece', p);
+      whiteCapturedDiv.appendChild(div);
+    });
 
-    blackCapturedDiv.innerHTML = capturedByBlack.map(p =>
-      `<div class="captured-piece" style="background-image: url('${PIECE_IMAGES[p]}')"></div>`
-    ).join('');
+    blackCapturedDiv.innerHTML = '';
+    capturedByBlack.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'captured-piece';
+      div.setAttribute('data-piece', p);
+      blackCapturedDiv.appendChild(div);
+    });
 
     // Display material count
     $('#white-material').textContent = whiteMaterial > 0 ? `+${whiteMaterial}` : '';

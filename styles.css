@@ -639,6 +639,16 @@ input[type="range"] {
   background-repeat: no-repeat;
   background-position: center;
 }
+.captured-piece[data-piece="P"] { background-image: url("https://chessboardjs.com/img/chesspieces/wikipedia/wP.png"); }
+.captured-piece[data-piece="N"] { background-image: url("https://chessboardjs.com/img/chesspieces/wikipedia/wN.png"); }
+.captured-piece[data-piece="B"] { background-image: url("https://chessboardjs.com/img/chesspieces/wikipedia/wB.png"); }
+.captured-piece[data-piece="R"] { background-image: url("https://chessboardjs.com/img/chesspieces/wikipedia/wR.png"); }
+.captured-piece[data-piece="Q"] { background-image: url("https://chessboardjs.com/img/chesspieces/wikipedia/wQ.png"); }
+.captured-piece[data-piece="p"] { background-image: url("https://chessboardjs.com/img/chesspieces/wikipedia/bP.png"); }
+.captured-piece[data-piece="n"] { background-image: url("https://chessboardjs.com/img/chesspieces/wikipedia/bN.png"); }
+.captured-piece[data-piece="b"] { background-image: url("https://chessboardjs.com/img/chesspieces/wikipedia/bB.png"); }
+.captured-piece[data-piece="r"] { background-image: url("https://chessboardjs.com/img/chesspieces/wikipedia/bR.png"); }
+.captured-piece[data-piece="q"] { background-image: url("https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png"); }
 #material-advantage {
   text-align: center;
   padding: 10px;
@@ -724,10 +734,10 @@ button, .nav-btn, .hof-actions button {
   min-width: 44px;
   padding: 10px 14px;
 }
-.mobile-only { display: none; }
+.mobile-only { display: inline-flex; }
 
 /* ===== Mobile ===== */
-.app-shell.menu-collapsed .sidebar { display: none; }
+.app-shell.menu-collapsed .sidebar { display: none !important; }
 
 @media (max-width: 1000px) {
   .app-shell { grid-template-columns: 1fr; }
