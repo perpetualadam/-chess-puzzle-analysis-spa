@@ -38,7 +38,7 @@ export const CONFIG = {
   BOARD: {
     DEFAULT_THEME: 'brown',
     DEFAULT_PIECE_SET: 'wikipedia',
-    THEMES: ['brown', 'green', 'blue', 'gray'],
+    THEMES: ['brown', 'green', 'blue', 'gray', 'white', 'black'],
     PIECE_SETS: ['wikipedia', 'merida'],
     MAX_WIDTH: 640,
     MIN_WIDTH: 320,

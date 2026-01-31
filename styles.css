@@ -288,6 +288,20 @@ body {
 #board { width: 100%; touch-action: none; }
 #arrows-canvas { position: absolute; inset: 0; pointer-events: none; }
 
+/* Board themes (chessboard.js square classes: .white-1e1d7 = light, .black-3c85d = dark) */
+#board-wrapper.theme-brown .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
+#board-wrapper.theme-brown .black-3c85d { background-color: #b58863; color: #f0d9b5; }
+#board-wrapper.theme-green .white-1e1d7 { background-color: #eeeed2; color: #769656; }
+#board-wrapper.theme-green .black-3c85d { background-color: #769656; color: #eeeed2; }
+#board-wrapper.theme-blue .white-1e1d7 { background-color: #dae0e6; color: #7c8fa5; }
+#board-wrapper.theme-blue .black-3c85d { background-color: #7c8fa5; color: #dae0e6; }
+#board-wrapper.theme-gray .white-1e1d7 { background-color: #e8e8e8; color: #a0a0a0; }
+#board-wrapper.theme-gray .black-3c85d { background-color: #a0a0a0; color: #e8e8e8; }
+#board-wrapper.theme-white .white-1e1d7 { background-color: #ffffff; color: #e0e0e0; }
+#board-wrapper.theme-white .black-3c85d { background-color: #e0e0e0; color: #ffffff; }
+#board-wrapper.theme-black .white-1e1d7 { background-color: #c0c0c0; color: #333333; }
+#board-wrapper.theme-black .black-3c85d { background-color: #333333; color: #c0c0c0; }
+
 .right-rail { display: grid; gap: 14px; align-content: start; }
 .eval-bar {
   width: 28px;

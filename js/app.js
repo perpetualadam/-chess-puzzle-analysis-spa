@@ -13,6 +13,14 @@
     window.__BOARD__ = board;
   }
 
+  function applyBoardTheme(theme){
+    const wrapper = document.getElementById('board-wrapper');
+    if(!wrapper) return;
+    const themes = ['brown','green','blue','gray','white','black'];
+    themes.forEach(t=> wrapper.classList.remove('theme-'+t));
+    wrapper.classList.add('theme-'+(theme||'brown'));
+  }
+
   function pieceThemeFromSetting(){
     const set = AppStorage.get().settings.pieceSet || 'wikipedia';
     // Use chessboardjs.com hosted images (official site)
@@ -39,7 +47,11 @@
 
   function initSettings(){
     const st = AppStorage.get().settings;
-    $('#setting-board-theme').value = st.theme||'brown';
+    const theme = st.theme||'brown';
+    $('#setting-board-theme').value = theme;
+    applyBoardTheme(theme);
+    const themeSelect = $('#setting-board-theme');
+    if(themeSelect) themeSelect.addEventListener('change', ()=>{ applyBoardTheme($('#setting-board-theme').value); });
     $('#setting-piece-set').value = st.pieceSet||'wikipedia';
     $('#setting-depth').value = st.depth||12;
     $('#setting-multipv').value = st.multipv||3;
