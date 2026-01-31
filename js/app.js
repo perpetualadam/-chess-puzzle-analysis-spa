@@ -68,16 +68,30 @@
       location.reload();
     });
 
-    const btnSettings = document.getElementById('btn-settings');
     const settingsPanel = document.getElementById('settings-panel');
+    const settingsBackdrop = document.getElementById('settings-backdrop');
     const appShell = document.querySelector('.app-shell');
-    if(btnSettings && settingsPanel){
-      btnSettings.addEventListener('click', ()=>{
-        if(appShell) appShell.classList.remove('menu-collapsed');
-        const isHidden = settingsPanel.hidden;
-        settingsPanel.hidden = !isHidden;
-      });
+    function openSettings(){
+      if(appShell) appShell.classList.remove('menu-collapsed');
+      if(settingsPanel){ settingsPanel.hidden = false; settingsPanel.setAttribute('aria-hidden', 'false'); }
+      if(settingsBackdrop){ settingsBackdrop.hidden = false; settingsBackdrop.setAttribute('aria-hidden', 'false'); }
     }
+    function closeSettings(){
+      if(settingsPanel){ settingsPanel.hidden = true; settingsPanel.setAttribute('aria-hidden', 'true'); }
+      if(settingsBackdrop){ settingsBackdrop.hidden = true; settingsBackdrop.setAttribute('aria-hidden', 'true'); }
+    }
+    function toggleSettings(){
+      if(settingsPanel && settingsPanel.hidden) openSettings();
+      else closeSettings();
+    }
+    document.body.addEventListener('click', function settingsClick(e){
+      const btn = (e.target.closest && e.target.closest('#btn-settings')) || (e.target.id === 'btn-settings' ? e.target : null);
+      if(btn){ e.preventDefault(); e.stopPropagation(); toggleSettings(); return; }
+      if(e.target === settingsBackdrop){ e.preventDefault(); closeSettings(); }
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && settingsPanel && !settingsPanel.hidden){ closeSettings(); }
+    });
     const btnHelp = document.getElementById('btn-help');
     const helpOverlay = document.getElementById('help-overlay');
     const helpClose = document.getElementById('help-close');
