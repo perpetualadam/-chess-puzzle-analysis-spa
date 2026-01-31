@@ -23,25 +23,32 @@
   <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
 
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Chessboard.js CSS -->
   <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="app-header">
-    <h1>Chess Puzzle & Analysis</h1>
+    <div class="header-brand">
+      <span class="header-icon" aria-hidden="true">♔</span>
+      <h1>Chess Puzzle & Analysis</h1>
+    </div>
     <div class="header-actions">
-      <button id="btn-settings" title="Settings">⚙️</button>
-      <button id="btn-menu" class="mobile-only" title="Menu">☰</button>
+      <button type="button" id="btn-settings" class="icon-btn" title="Settings" aria-label="Settings">⚙️</button>
+      <button type="button" id="btn-menu" class="icon-btn mobile-only" title="Menu" aria-label="Menu">☰</button>
     </div>
   </header>
 
   <div class="app-shell">
     <aside class="sidebar">
       <nav>
-        <button class="nav-btn active" data-target="puzzle-section">Puzzle Mode</button>
-        <button class="nav-btn" data-target="analysis-section">Analysis Mode</button>
-        <button class="nav-btn" data-target="hof-section">Hall of Fame</button>
+        <button type="button" class="nav-btn active" data-target="puzzle-section">Puzzle Mode</button>
+        <button type="button" class="nav-btn" data-target="analysis-section">Analysis Mode</button>
+        <button type="button" class="nav-btn" data-target="hof-section">Hall of Fame</button>
       </nav>
 
       <section class="panel settings" id="settings-panel" hidden>
@@ -81,11 +88,11 @@
         <label>
           <input id="setting-scoring-enabled" type="checkbox" checked /> Enable Scoring/Rating Changes
         </label>
-        <button id="save-settings">Save</button>
+        <button type="button" id="save-settings">Save</button>
         <hr/>
         <div class="dev-section">
           <h4 style="margin: 8px 0; font-size: 14px; color: var(--muted);">Developer Tools</h4>
-          <button id="btn-verify-puzzles" title="Verify all composed mate-pattern puzzles">Verify Puzzles</button>
+          <button type="button" id="btn-verify-puzzles" title="Verify all composed mate-pattern puzzles">Verify Puzzles</button>
         </div>
       </section>
     </aside>
@@ -103,12 +110,12 @@
           </div>
 
           <div class="mobile-tabs">
-            <button class="tab-btn active" data-tab="lines">Lines</button>
-            <button class="tab-btn" data-tab="chart">Chart</button>
+            <button type="button" class="tab-btn active" data-tab="lines">Lines</button>
+            <button type="button" class="tab-btn" data-tab="chart">Chart</button>
           </div>
           <div class="eval-controls panel-tab" id="lines-panel" data-panel="lines">
-            <button id="engine-start">Start Engine</button>
-            <button id="engine-stop">Stop</button>
+            <button type="button" id="engine-start">Start Engine</button>
+            <button type="button" id="engine-stop">Stop</button>
             <label>Depth <input id="engine-depth" type="range" min="5" max="28" value="14"/></label>
             <label>MultiPV <input id="engine-multipv" type="range" min="1" max="3" value="3"/></label>
             <div id="engine-lines"></div>
@@ -124,10 +131,10 @@
       <section id="puzzle-section" class="mode-section">
         <div class="mode-header">
           <h2>Puzzle Mode</h2>
-          <div class="puzzle-stats">
-            <span>Rating: <b id="user-rating">1200</b></span>
-            <span>Streak: <b id="user-streak">0</b></span>
-            <span>Level: <b id="user-level">1</b></span>
+          <div class="puzzle-stats stat-cards">
+            <div class="stat-card"><span class="stat-label">Rating</span><span id="user-rating" class="stat-value">1200</span></div>
+            <div class="stat-card"><span class="stat-label">Streak</span><span id="user-streak" class="stat-value">0</span></div>
+            <div class="stat-card"><span class="stat-label">Level</span><span id="user-level" class="stat-value">1</span></div>
           </div>
         </div>
 
@@ -183,14 +190,16 @@
             <span class="battle-target">First to <b id="battle-target-score">5</b></span>
           </div>
 
-          <button id="btn-new-puzzle">New Puzzle</button>
-          <button id="btn-hint">Hint</button>
-          <button id="btn-solution">Solution</button>
-          <button id="btn-view-source" hidden title="Jump to this position in the original game">View Source Game</button>
-          <button id="btn-start-rush" hidden>Start Rush</button>
-          <button id="btn-end-rush" hidden>End Rush</button>
-          <button id="btn-start-battle" hidden>Start Battle</button>
-          <button id="btn-end-battle" hidden>End Battle</button>
+          <div class="puzzle-action-group">
+            <button type="button" id="btn-new-puzzle" class="btn-primary">New Puzzle</button>
+            <button type="button" id="btn-hint" class="btn-secondary">Hint</button>
+            <button type="button" id="btn-solution" class="btn-secondary">Solution</button>
+          </div>
+          <button type="button" id="btn-view-source" hidden title="Jump to this position in the original game">View Source Game</button>
+          <button type="button" id="btn-start-rush" hidden>Start Rush</button>
+          <button type="button" id="btn-end-rush" hidden>End Rush</button>
+          <button type="button" id="btn-start-battle" hidden>Start Battle</button>
+          <button type="button" id="btn-end-battle" hidden>End Battle</button>
         </div>
 
         <div class="puzzle-info">
@@ -203,18 +212,18 @@
       <section id="analysis-section" class="mode-section" hidden>
         <div class="mode-header">
           <h2>Analysis Mode</h2>
-          <div>
-            <button id="btn-load-pgn">Load PGN</button>
-            <button id="btn-analyze-game">Analyze Game</button>
-            <button id="btn-export-pgn">Export Annotated PGN</button>
+          <div class="analysis-header-actions">
+            <button type="button" id="btn-load-pgn" class="btn-primary">Load PGN</button>
+            <button type="button" id="btn-analyze-game" class="btn-secondary">Analyze Game</button>
+            <button type="button" id="btn-export-pgn" class="btn-secondary">Export Annotated PGN</button>
           </div>
         </div>
         <div class="analysis-controls">
           <textarea id="pgn-input" placeholder="Paste PGN here or pick from Hall of Fame..."></textarea>
           <div class="importers">
             <input id="import-file" type="file" accept=".csv,.pgn" />
-            <button id="btn-import-puzzles">Import Puzzles</button>
-            <button id="btn-use-imported">Use Imported Puzzles</button>
+            <button type="button" id="btn-import-puzzles">Import Puzzles</button>
+            <button type="button" id="btn-use-imported">Use Imported Puzzles</button>
             <span id="import-status"></span>
           </div>
 
@@ -240,11 +249,11 @@
           </div>
 
           <div class="game-nav">
-            <button id="first-move">|&lt;</button>
-            <button id="prev-move">&lt;</button>
-            <span id="move-indicator">0/0</span>
-            <button id="next-move">&gt;</button>
-            <button id="last-move">&gt;|</button>
+            <button type="button" id="first-move" class="nav-arrow" title="First move">⏮</button>
+            <button type="button" id="prev-move" class="nav-arrow" title="Previous move">◀</button>
+            <span id="move-indicator" class="move-indicator">0/0</span>
+            <button type="button" id="next-move" class="nav-arrow" title="Next move">▶</button>
+            <button type="button" id="last-move" class="nav-arrow" title="Last move">⏭</button>
           </div>
           <div id="game-mistakes"></div>
         </div>
