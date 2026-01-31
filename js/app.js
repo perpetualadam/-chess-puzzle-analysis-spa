@@ -26,11 +26,15 @@
     engine.on('raw', (line)=>{/* dev: console.log(line); */});
 
     // Eval pointer baseline
-    const ptr = document.getElementById('eval-pointer'); ptr.style.top = '50%';
+    const ptr = document.getElementById('eval-pointer'); if(ptr) ptr.style.top = '50%';
 
-    // Controls
-    $('#engine-start').addEventListener('click', ()=> engine.start());
-    $('#engine-stop').addEventListener('click', ()=> engine.stop());
+    // Engine Start/Stop with UI feedback
+    const btnStart = document.getElementById('engine-start');
+    const btnStop = document.getElementById('engine-stop');
+    function updateEngineButtons(){ if(btnStop) btnStop.disabled = !engine.worker; if(btnStart) btnStart.disabled = !!engine.worker; }
+    if(btnStart){ btnStart.addEventListener('click', ()=>{ engine.start(); updateEngineButtons(); }); }
+    if(btnStop){ btnStop.addEventListener('click', ()=>{ engine.stop(); updateEngineButtons(); }); }
+    updateEngineButtons();
   }
 
   function initSettings(){
@@ -64,9 +68,29 @@
       location.reload();
     });
 
-    $('#btn-settings').addEventListener('click', ()=>{
-      const p = $('#settings-panel'); p.hidden = !p.hidden;
-    });
+    const btnSettings = document.getElementById('btn-settings');
+    const settingsPanel = document.getElementById('settings-panel');
+    const appShell = document.querySelector('.app-shell');
+    if(btnSettings && settingsPanel){
+      btnSettings.addEventListener('click', ()=>{
+        if(appShell) appShell.classList.remove('menu-collapsed');
+        const isHidden = settingsPanel.hidden;
+        settingsPanel.hidden = !isHidden;
+      });
+    }
+    const btnHelp = document.getElementById('btn-help');
+    const helpOverlay = document.getElementById('help-overlay');
+    const helpClose = document.getElementById('help-close');
+    if(btnHelp && helpOverlay){
+      btnHelp.addEventListener('click', ()=>{ helpOverlay.hidden = false; });
+    }
+    if(helpClose && helpOverlay){
+      helpClose.addEventListener('click', ()=>{ helpOverlay.hidden = true; });
+    }
+    if(helpOverlay){
+      helpOverlay.addEventListener('click', (e)=>{ if(e.target === helpOverlay) helpOverlay.hidden = true; });
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && !helpOverlay.hidden){ helpOverlay.hidden = true; } });
+    }
   }
 
   function initNav(){

@@ -55,7 +55,8 @@
     }
 
     requestEval(fen, depth=14, multipv=3){
-      return new Promise((resolve)=>{
+      return new Promise((resolve, reject)=>{
+        if(!this.worker){ reject(new Error('Engine not running')); return; }
         const lines = [];
         const onInfo = (info)=>{ if(info.pv){ lines.push(info); } };
         const onBest = ()=>{ this.off('info', onInfo); this.off('bestmove', onBest); resolve(this._collect(lines, multipv)); };

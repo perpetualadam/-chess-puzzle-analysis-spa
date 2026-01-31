@@ -16,18 +16,34 @@
   // Multi-move puzzle state
   let puzzleMoveIndex = 0; // Track which move in the solution sequence
   let playerColor = 'w'; // Which color the player is playing
+  let selectedSquare = null; // For tap-to-show-moves on mobile
 
   function $(sel){ return document.querySelector(sel); }
+
+  function setPuzzleMessage(text, type){
+    const el = $('#puzzle-instructions');
+    if(el) el.textContent = text;
+  }
+
+  function formatMove(move){ return move ? (move.san || move.from + move.to) : ''; }
+
+  function buildStatus(opts){
+    const parts = [];
+    if(opts.puzzleName) parts.push(opts.puzzleName);
+    if(opts.tactic && opts.tactic.length) parts.push('Tactic: ' + opts.tactic.join(', '));
+    if(opts.check) parts.push('King in check!');
+    if(opts.move) parts.push('Move: ' + opts.move);
+    if(opts.instruction) parts.push(opts.instruction);
+    return parts.filter(Boolean).join(' · ');
+  }
 
   function initBoard(){
     const onDrop = (source, target, piece, newPos, oldPos, orientation) => {
       if(pendingCheck) return 'snapback';
       if(!currentPuzzle) return 'snapback'; // No puzzle loaded
-
-      // Try the move with automatic queen promotion
+      clearMoveDots();
       const move = chess.move({ from: source, to: target, promotion: 'q' });
       if(!move) return 'snapback';
-
       board.position(chess.fen(), false);
       verifyMove(move);
     };
@@ -45,6 +61,27 @@
     ctx = arrowsCanvas.getContext('2d');
     window.addEventListener('resize', resize);
     setTimeout(resize, 50);
+
+    const wrapper = document.getElementById('board-wrapper');
+    if(wrapper){
+      wrapper.addEventListener('click', (e)=>{
+        if(!currentPuzzle || pendingCheck) return;
+        const sq = squareFromPoint(e.clientX, e.clientY);
+        if(sq){ showMovesForSquare(sq); }
+        else { clearMoveDots(); drawArrows([]); }
+      });
+      wrapper.addEventListener('touchstart', (e)=>{ if(e.touches.length===1) window.__touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
+      wrapper.addEventListener('touchend', (e)=>{
+        if(!currentPuzzle || pendingCheck || !e.changedTouches.length) return;
+        const t = e.changedTouches[0];
+        const start = window.__touchStart;
+        if(start && Math.abs(t.clientX - start.x) < 15 && Math.abs(t.clientY - start.y) < 15){
+          const sq = squareFromPoint(t.clientX, t.clientY);
+          if(sq){ showMovesForSquare(sq); e.preventDefault(); }
+          else { clearMoveDots(); drawArrows([]); }
+        }
+      }, { passive: false });
+    }
   }
 
   function pieceThemeFromSetting(){
@@ -59,20 +96,21 @@
     try { const mv = chess.move(san, { sloppy: true }); if(!mv) return null; chess.undo(); return mv.from+mv.to+(mv.promotion||''); } catch{ return null; }
   }
 
+  function sqToXY(size, sq){ const f = sq.charCodeAt(0)-97; const rnk = 8 - (sq.charCodeAt(1)-48); return { x: f*size + size/2, y: rnk*size + size/2 }; }
+
   function drawArrows(arr){
+    if(!ctx || !arrowsCanvas) return;
     const r = $('#board').getBoundingClientRect();
+    if(!r.width) return;
     ctx.clearRect(0,0,arrowsCanvas.width, arrowsCanvas.height);
     const size = r.width/8;
-    const sqToXY = (sq)=>{ const f = sq.charCodeAt(0)-97; const rnk = 8 - (sq.charCodeAt(1)-48); return { x: f*size + size/2, y: rnk*size + size/2 }; };
     ctx.lineWidth = Math.max(4, size*0.08);
     for(const a of arr){
       const [from, to] = uciToSquares(a.move);
-      const p1 = sqToXY(from), p2 = sqToXY(to);
+      const p1 = sqToXY(size, from), p2 = sqToXY(size, to);
       ctx.strokeStyle = a.color||'rgba(63,185,80,0.9)';
       ctx.fillStyle = ctx.strokeStyle;
-      // line
       ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-      // arrow head
       const angle = Math.atan2(p2.y-p1.y, p2.x-p1.x);
       const head = size*0.35;
       ctx.beginPath();
@@ -80,6 +118,43 @@
       ctx.lineTo(p2.x - head*Math.cos(angle-0.5), p2.y - head*Math.sin(angle-0.5));
       ctx.lineTo(p2.x - head*Math.cos(angle+0.5), p2.y - head*Math.sin(angle+0.5));
       ctx.closePath(); ctx.fill();
+    }
+    if(selectedSquare && window.__lastMoveDots){ drawMoveDots(size, window.__lastMoveDots); }
+  }
+
+  function clearMoveDots(){ selectedSquare = null; window.__lastMoveDots = null; }
+
+  function squareFromPoint(px, py){
+    const r = $('#board').getBoundingClientRect();
+    if(px < r.left || px > r.right || py < r.top || py > r.bottom) return null;
+    const size = r.width / 8;
+    const x = px - r.left, y = py - r.top;
+    const col = Math.floor(x / size), row = Math.floor(y / size);
+    if(col < 0 || col > 7 || row < 0 || row > 7) return null;
+    const ori = (board && board.orientation) ? board.orientation() : 'white';
+    const file = ori === 'black' ? 7 - col : col;
+    const rank = ori === 'black' ? row + 1 : 8 - row;
+    return String.fromCharCode(97 + file) + rank;
+  }
+
+  function showMovesForSquare(sq){
+    if(!chess.get(sq) || chess.get(sq).color !== chess.turn()) return;
+    const moves = chess.moves({ square: sq, verbose: true });
+    const toSquares = moves.map(m => m.to);
+    selectedSquare = sq;
+    window.__lastMoveDots = toSquares;
+    drawArrows([]);
+  }
+
+  function drawMoveDots(size, squares){
+    if(!squares || !squares.length) return;
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.35)';
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.8)';
+    ctx.lineWidth = 2;
+    const radius = size * 0.2;
+    for(const sq of squares){
+      const { x, y } = sqToXY(size, sq);
+      ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI*2); ctx.fill(); ctx.stroke();
     }
   }
 
@@ -92,12 +167,15 @@
 
   async function verifyMove(move){
     pendingCheck = true;
+    if(!engine || !engine.worker){ setPuzzleMessage('Engine stopped. Start Engine to verify moves.'); pendingCheck = false; return; }
     const depth = +($('#engine-depth').value || AppStorage.get().settings.depth || 12);
     const multipv = +($('#engine-multipv').value || AppStorage.get().settings.multipv || 3);
 
-    // Evaluate original position best moves
-    const before = new Chess(chess.fen()); before.undo(); const startFEN = before.fen();
-    const lines = await engine.requestEval(startFEN, Math.max(8, depth-2), multipv);
+    let lines = [];
+    try {
+      const before = new Chess(chess.fen()); before.undo(); const startFEN = before.fen();
+      lines = await engine.requestEval(startFEN, Math.max(8, depth-2), multipv);
+    } catch(e){ setPuzzleMessage('Engine not ready. Click Start Engine.'); pendingCheck = false; return; }
     const bestUCIs = lines.map(l => (l.pv||'').split(/\s+/)[0]).filter(Boolean);
 
     const played = move.from+move.to+(move.promotion||'');
@@ -105,7 +183,8 @@
 
     // Evaluate after move to gauge quality
     const afterFEN = chess.fen();
-    const afterLines = await engine.requestEval(afterFEN, depth, 1);
+    let afterLines = [];
+    try { afterLines = await engine.requestEval(afterFEN, depth, 1); } catch(e){}
     const beforeTop = lines[0]?.score; const afterTop = afterLines[0]?.score;
 
     let ok = isTop;
@@ -117,8 +196,10 @@
     }
 
     const info = $('#puzzle-instructions');
+    const moveSan = move.san || (move.from + move.to);
     if(ok){
-      info.textContent = 'Correct!';
+      const msg = chess.in_check() ? 'Correct! ' + moveSan + ' · King in check!' : 'Correct! ' + moveSan;
+      setPuzzleMessage(msg);
       drawArrows([{ move: played }]);
       puzzleMoveIndex++;
 
@@ -132,29 +213,26 @@
         return;
       }
     } else {
-      info.textContent = 'Try again or view solution.';
+      setPuzzleMessage('Not the best move. Try again or view solution.');
       onSolve(false, delta);
     }
     pendingCheck = false;
   }
 
   function isPuzzleComplete(){
-    // Puzzle is complete when it's checkmate or we've played all expected moves
     if(chess.game_over()) return true;
-
-    // For engine-evaluated puzzles, we consider it complete after the first correct move
-    // unless the puzzle has a specific move sequence defined
-    return true; // For now, complete after first correct move
+    return false;
   }
 
   async function playOpponentMove(){
     if(!currentPuzzle || chess.game_over()) return;
-
+    if(!engine || !engine.worker){ setPuzzleMessage('Engine stopped. Start Engine for opponent moves.'); return; }
     pendingCheck = true;
-
-    // Get best move from engine for opponent
-    const depth = +($('#engine-depth').value || AppStorage.get().settings.depth || 12);
-    const lines = await engine.requestEval(chess.fen(), depth, 1);
+    let lines = [];
+    try {
+      const depth = +($('#engine-depth').value || AppStorage.get().settings.depth || 12);
+      lines = await engine.requestEval(chess.fen(), depth, 1);
+    } catch(e){ setPuzzleMessage('Engine not ready. Start Engine.'); pendingCheck = false; return; }
     const bestMove = lines[0]?.pv?.split(/\s+/)[0];
 
     if(bestMove && bestMove.length >= 4){
@@ -170,10 +248,11 @@
 
         // Check if game is over after opponent's move
         if(chess.game_over()){
-          $('#puzzle-instructions').textContent = 'Puzzle complete!';
+          setPuzzleMessage((currentPuzzle.source || 'Puzzle') + ' complete!');
           onSolve(true, 0);
         } else {
-          $('#puzzle-instructions').textContent = 'Your turn - find the next move!';
+          const instr = chess.in_check() ? 'Your turn · King in check!' : 'Your turn — find the next move.';
+          setPuzzleMessage(instr);
         }
       }
     }
@@ -388,25 +467,24 @@
     }
 
     // If player is not the side to move, play opponent's first move
-    if(playerColor !== chess.turn()){
-      // Get opponent's best move and play it
+    if(playerColor !== chess.turn() && engine && engine.worker){
       setTimeout(async () => {
-        const depth = +($('#engine-depth').value || AppStorage.get().settings.depth || 12);
-        const lines = await engine.requestEval(chess.fen(), depth, 1);
-        const bestMove = lines[0]?.pv?.split(/\s+/)[0];
-
-        if(bestMove && bestMove.length >= 4){
-          const from = bestMove.slice(0, 2);
-          const to = bestMove.slice(2, 4);
-          const promotion = bestMove[4] || '';
-
-          const move = chess.move({ from, to, promotion: promotion || undefined });
-          if(move){
-            board.position(chess.fen(), true);
-            drawArrows([{ move: bestMove, color: 'rgba(255,100,100,0.7)' }]);
-            $('#puzzle-instructions').textContent = 'Your turn - find the best move!';
+        try {
+          const depth = +($('#engine-depth').value || AppStorage.get().settings.depth || 12);
+          const lines = await engine.requestEval(chess.fen(), depth, 1);
+          const bestMove = lines[0]?.pv?.split(/\s+/)[0];
+          if(bestMove && bestMove.length >= 4){
+            const from = bestMove.slice(0, 2);
+            const to = bestMove.slice(2, 4);
+            const promotion = bestMove[4] || '';
+            const move = chess.move({ from, to, promotion: promotion || undefined });
+            if(move){
+              board.position(chess.fen(), true);
+              drawArrows([{ move: bestMove, color: 'rgba(255,100,100,0.7)' }]);
+              setPuzzleMessage((currentPuzzle.source || 'Puzzle') + ' · Your turn — find the best move.');
+            }
           }
-        }
+        } catch(e){ setPuzzleMessage('Your turn. (Engine was stopped; start it for hints.)'); }
       }, 500);
     }
 
@@ -417,13 +495,17 @@
     $('#puzzle-source').textContent = `${currentPuzzle.source||''} · Themes: ${(currentPuzzle.themes||[]).join(', ')} · Playing as ${playerColor === 'w' ? 'White' : 'Black'}`;
     const tipEl = document.getElementById('puzzle-pattern-tip');
     if(tipEl){ const tip = currentPuzzle.patternTip; tipEl.hidden = !tip; tipEl.textContent = tip ? `Tip: ${tip}` : ''; }
-    $('#puzzle-instructions').textContent = 'Find the best move.';
+    const tactic = (currentPuzzle.themes||[]).join(', ') || 'best move';
+    const name = currentPuzzle.source || ('Puzzle ' + (currentPuzzle.id||''));
+    const startMsg = chess.in_check() ? name + ' · King in check! Find the best move.' : name + ' · Tactic: ' + tactic + '. Find the best move.';
+    setPuzzleMessage(startMsg);
     startTimer();
 
     // Toggle View Source Game button for game-derived puzzles
     const viewBtn = document.getElementById('btn-view-source');
     if(viewBtn){ viewBtn.hidden = !(currentPuzzle && currentPuzzle.from && currentPuzzle.from.gameId); }
 
+    clearMoveDots();
     drawArrows([]);
     if(engine) showEngineLines();
 
@@ -451,21 +533,29 @@
   function showSolution(){
     if(!currentPuzzle) return;
     const tmp = new Chess(chess.fen());
-    let moveUci = null;
-    if(currentPuzzle.best && currentPuzzle.best.length){
-      const first = currentPuzzle.best[0];
-      if(/^[a-h][1-8][a-h][1-8]/.test(first)) moveUci = first;
-      else moveUci = algebraicToUciSan(tmp, first);
+    const best = currentPuzzle.best && Array.isArray(currentPuzzle.best) ? currentPuzzle.best : [];
+    const arrows = [];
+    for(let i = 0; i < best.length; i++){
+      const sanOrUci = best[i];
+      let moveUci = null;
+      if(/^[a-h][1-8][a-h][1-8]/.test(sanOrUci)) moveUci = sanOrUci;
+      else moveUci = algebraicToUciSan(tmp, sanOrUci);
+      if(!moveUci) break;
+      const move = tmp.move({ from: moveUci.slice(0,2), to: moveUci.slice(2,4), promotion: (moveUci.length >= 5) ? moveUci[4] : 'q' });
+      if(!move) break;
+      arrows.push({ move: moveUci, color: 'rgba(59,130,246,0.9)' });
     }
-    if(!moveUci){ $('#puzzle-instructions').textContent = 'No explicit solution stored. Use engine to inspect.'; return; }
-    const [from,to] = uciToSquares(moveUci);
-    tmp.move({from,to,promotion:'q'});
+    if(arrows.length === 0){
+      $('#puzzle-instructions').textContent = 'No explicit solution stored. Use engine to inspect.';
+      return;
+    }
     board.position(tmp.fen(), true);
-    drawArrows([{ move: moveUci, color: 'rgba(59,130,246,0.9)' }]);
+    drawArrows(arrows);
+    $('#puzzle-instructions').textContent = 'Solution: ' + best.slice(0, arrows.length).join(', ');
   }
 
   function showEngineLines(){
-    // Kick one eval for the current board and render top lines + arrows
+    if(!engine || !engine.worker){ setPuzzleMessage('Engine stopped. Click Start Engine in the right panel.'); return; }
     const depth = +($('#engine-depth').value || AppStorage.get().settings.depth || 12);
     const multipv = +($('#engine-multipv').value || AppStorage.get().settings.multipv || 3);
     engine.requestEval(chess.fen(), depth, multipv).then(lines => {
@@ -477,7 +567,7 @@
       };
       linesDiv.textContent = lines.map(fmt).join('\n');
       drawArrows(lines.filter(l=>l.pv).map(l=>({ move: l.pv.split(/\s+/)[0], color: 'rgba(63,185,80,0.7)' })));
-    });
+    }).catch(()=>{ setPuzzleMessage('Engine not ready. Click Start Engine.'); });
   }
 
   // Quick app-side verification for composed mate-pattern puzzles (path check only)

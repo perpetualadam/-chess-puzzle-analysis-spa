@@ -38,10 +38,38 @@
       <h1>Chess Puzzle & Analysis</h1>
     </div>
     <div class="header-actions">
+      <button type="button" id="btn-help" class="icon-btn" title="How to use" aria-label="Help">?</button>
       <button type="button" id="btn-settings" class="icon-btn" title="Settings" aria-label="Settings">⚙️</button>
       <button type="button" id="btn-menu" class="icon-btn mobile-only" title="Menu" aria-label="Menu">☰</button>
     </div>
   </header>
+
+  <div id="help-overlay" class="help-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="help-title">
+    <div class="help-modal">
+      <div class="help-header">
+        <h2 id="help-title">How to use this app</h2>
+        <button type="button" id="help-close" class="icon-btn" aria-label="Close">×</button>
+      </div>
+      <div class="help-body">
+        <h3>Puzzle Mode</h3>
+        <p><strong>Goal:</strong> Find the best move (or sequence) for the side you're playing. Drag a piece to a legal square to make a move.</p>
+        <ul>
+          <li><strong>New Puzzle</strong> — Load a new random puzzle. Use the mode dropdown for Rated, Custom (by theme/rating), Puzzle Rush, Battle (vs AI), or Daily.</li>
+          <li><strong>Hint</strong> — Show engine lines and arrows for the current position (requires engine running).</li>
+          <li><strong>Solution</strong> — Reveal the full solution: pieces move to the final position and arrows show the line.</li>
+          <li>After your correct move, the <strong>opponent’s reply</strong> plays automatically. Keep solving until the puzzle is complete.</li>
+        </ul>
+        <h3>Analysis Mode</h3>
+        <p>Paste PGN or pick a game from Hall of Fame. Use <strong>Load PGN</strong> to paste or type a game ID. <strong>Analyze Game</strong> runs the engine; <strong>Export</strong> saves an annotated PGN. Use the move buttons (⏮ ◀ ▶ ⏭) to step through the game.</p>
+        <h3>Engine (right panel)</h3>
+        <p><strong>Start Engine</strong> / <strong>Stop</strong> — Turn the Stockfish engine on or off. The engine is used for puzzle verification, opponent moves, and analysis. Depth and MultiPV sliders control search depth and number of lines.</p>
+        <h3>Settings (gear icon)</h3>
+        <p>Board theme, piece set, engine depth, MultiPV, timed puzzles, and scoring. Save and reload to apply.</p>
+        <h3>Mobile</h3>
+        <p>Tap and drag pieces on the board. The board area is set so dragging doesn’t scroll the page. Use the menu (☰) to open the sidebar on small screens.</p>
+      </div>
+    </div>
+  </div>
 
   <div class="app-shell">
     <aside class="sidebar">
