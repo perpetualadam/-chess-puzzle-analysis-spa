@@ -207,8 +207,7 @@
       if(isPuzzleComplete()){
         onSolve(true, delta);
       } else {
-        // Play opponent's response after a delay
-        pendingCheck = false;
+        // Play opponent's response after a delay (keep pendingCheck so user cannot move until opponent has played)
         setTimeout(() => playOpponentMove(), 400);
         return;
       }
@@ -225,8 +224,8 @@
   }
 
   async function playOpponentMove(){
-    if(!currentPuzzle || chess.game_over()) return;
-    if(!engine || !engine.worker){ setPuzzleMessage('Engine stopped. Start Engine for opponent moves.'); return; }
+    if(!currentPuzzle || chess.game_over()){ pendingCheck = false; return; }
+    if(!engine || !engine.worker){ setPuzzleMessage('Engine stopped. Start Engine for opponent moves.'); pendingCheck = false; return; }
     pendingCheck = true;
     let lines = [];
     try {

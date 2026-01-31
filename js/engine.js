@@ -5,6 +5,8 @@
       this.worker = null;
       this.listeners = { info: [], bestmove: [], raw: [] };
       this.ready = false;
+      this._evalQueue = [];
+      this._evalInProgress = false;
     }
     start(){
       if(this.worker) return;
@@ -15,6 +17,8 @@
     }
     stop(){
       if(this.worker){ this.worker.terminate(); this.worker = null; this.ready = false; }
+      this._evalQueue = [];
+      this._evalInProgress = false;
     }
     on(type, cb){ if(this.listeners[type]) this.listeners[type].push(cb); }
     off(type, cb){ this.listeners[type] = (this.listeners[type]||[]).filter(f=>f!==cb); }
@@ -35,12 +39,10 @@
     }
 
     _parseBest(line){
-      // bestmove e2e4 ponder e7e5
       const parts = line.split(/\s+/);
       return { bestmove: parts[1]||'' };
     }
     _parseInfo(line){
-      // info depth 15 seldepth 25 multipv 1 score cp 34 pv e2e4 e7e5 ...
       const o = { raw: line };
       const m = line.match(/depth (\d+)/); if(m) o.depth = +m[1];
       const mv = line.match(/multipv (\d+)/); if(mv) o.multipv = +mv[1];
@@ -57,17 +59,33 @@
     requestEval(fen, depth=14, multipv=3){
       return new Promise((resolve, reject)=>{
         if(!this.worker){ reject(new Error('Engine not running')); return; }
-        const lines = [];
-        const onInfo = (info)=>{ if(info.pv){ lines.push(info); } };
-        const onBest = ()=>{ this.off('info', onInfo); this.off('bestmove', onBest); resolve(this._collect(lines, multipv)); };
-        this.on('info', onInfo); this.on('bestmove', onBest);
-        this.setMultiPV(multipv);
-        this.positionFEN(fen);
-        this.goDepth(depth);
+        this._evalQueue.push({ fen, depth, multipv, resolve, reject });
+        this._processEvalQueue();
       });
     }
+
+    _processEvalQueue(){
+      if(this._evalInProgress || this._evalQueue.length === 0) return;
+      const job = this._evalQueue.shift();
+      this._evalInProgress = true;
+      const lines = [];
+      const onInfo = (info)=>{ if(info.pv) lines.push(info); };
+      const onBest = ()=>{
+        this.off('info', onInfo);
+        this.off('bestmove', onBest);
+        this._evalInProgress = false;
+        job.resolve(this._collect(lines, job.multipv));
+        this._processEvalQueue();
+      };
+      this.on('info', onInfo);
+      this.on('bestmove', onBest);
+      this.stopSearch();
+      this.setMultiPV(job.multipv);
+      this.positionFEN(job.fen);
+      this.goDepth(job.depth);
+    }
+
     _collect(infos, multipv){
-      // Keep only last info per multipv index
       const byIdx = new Map();
       for(const i of infos){ const k = i.multipv||1; byIdx.set(k, i); }
       return Array.from(byIdx.keys()).sort((a,b)=>a-b).slice(0, multipv).map(k=>byIdx.get(k));
