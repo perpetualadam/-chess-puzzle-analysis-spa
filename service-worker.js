@@ -99,7 +99,7 @@ self.addEventListener('fetch', event => {
         }).catch(error => {
           console.log('[Service Worker] Fetch failed:', event.request.url, error);
           // Network failed, return offline page if available
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         });
       })
   );
